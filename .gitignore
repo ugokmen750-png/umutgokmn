@@ -1,0 +1,9 @@
+node_modules/
+# Çalışma dosyaları (depoya girmez)
+.claude/
+.backups/
+kaynak/
+scratchpad/
+CLAUDE.md
+AGENTS.md
+*.log

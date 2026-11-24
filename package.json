@@ -1,0 +1,13 @@
+{
+  "name": "hasbey-mermer-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node src/build.mjs",
+    "serve": "node serve.mjs"
+  },
+  "devDependencies": {
+    "@fontsource-variable/manrope": "^5.3.0",
+    "@fontsource/marcellus": "^5.3.0"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "Hasbey Karo Mermer",
+  "short_name": "Hasbey Mermer",
+  "lang": "tr",
+  "start_url": "/umutgokmn/",
+  "display": "standalone",
+  "background_color": "#0f0f10",
+  "theme_color": "#0f0f10",
+  "icons": [
+    {
+      "src": "/umutgokmn/assets/img/logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/umutgokmn/assets/img/logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
