@@ -56,14 +56,15 @@ ul, ol { padding: 0; list-style: none; }
 .section--sand { background: var(--sand); }
 .section--nero { background: var(--nero); color: var(--on-dark-2); }
 .section--emerald { background: var(--emerald); color: #c4d2ca; }
+.section--ivory + .section--ivory, .section--nero + .section--nero { padding-top: 0; }
 .bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
 
 /* ---------- Tipografi ---------- */
 .h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(40px, 5.2vw, 84px); line-height: 1; letter-spacing: -.015em; color: var(--ink); text-wrap: balance; }
-.section--nero .h2, .section--emerald .h2, .area .h2 { color: var(--on-dark); }
+.section--nero .h2, .section--emerald .h2 { color: var(--on-dark); }
 em { font-family: var(--serif); font-style: italic; }
 .h2 em, .hero__title em, .phero__title em, .cta__title em, .footer__statement em, .panel__title em, .qform__title em, .mega__lead em { color: var(--brass-d); }
-.section--nero .h2 em, .section--emerald .h2 em, .area .h2 em, .hero__title em, .phero__title em, .footer__statement em { color: var(--brass); }
+.section--nero .h2 em, .section--emerald .h2 em, .hero__title em, .phero__title em, .footer__statement em { color: var(--brass); }
 .lead { font-size: clamp(18px, 1.45vw, 21px); line-height: 1.6; max-width: 560px; }
 .muted { color: var(--muted); }
 
@@ -200,11 +201,11 @@ em { font-family: var(--serif); font-style: italic; }
 .hero__facts span { font-size: 13px; letter-spacing: .04em; color: var(--on-dark-2); }
 
 /* ---------- Malzeme şeridi ---------- */
-.marquee { overflow: hidden; background: var(--ivory); border-bottom: 1px solid var(--stone); padding: clamp(20px, 2.4vw, 34px) 0; }
-.marquee__track { display: flex; align-items: center; width: max-content; animation: marquee 46s linear infinite; }
-.marquee span { padding: 0 .42em; font-family: var(--serif); font-style: italic; font-size: clamp(46px, 6.4vw, 104px); line-height: 1; color: var(--ink); white-space: nowrap; }
-.marquee span:nth-of-type(3n+2) { color: transparent; -webkit-text-stroke: 1px var(--ink); }
-.marquee i { width: 12px; height: 12px; flex: none; background: var(--brass); transform: rotate(45deg); }
+.marquee { overflow: hidden; background: var(--ivory); border-bottom: 1px solid var(--stone); padding: 13px 0; }
+.marquee__track { display: flex; align-items: center; width: max-content; animation: marquee 40s linear infinite; }
+.marquee span { padding: 0 .9em; font-family: var(--serif); font-style: italic; font-size: clamp(20px, 1.9vw, 28px); line-height: 1.2; color: var(--ink); white-space: nowrap; }
+.marquee span:nth-of-type(3n+2) { color: var(--brass-d); }
+.marquee i { width: 6px; height: 6px; flex: none; background: var(--brass); transform: rotate(45deg); }
 @keyframes marquee { to { transform: translateX(-50%); } }
 
 /* ---------- Hakkımızda ---------- */
@@ -281,14 +282,13 @@ em { font-family: var(--serif); font-style: italic; }
 .step p { font-size: 15px; color: var(--muted); }
 
 /* ---------- Hizmet bölgesi bandı ---------- */
-.area { position: relative; overflow: hidden; padding: clamp(110px, 12vw, 190px) 0; background: var(--nero); color: var(--on-dark-2); text-align: center; }
-.area::after { content: ''; position: absolute; inset: 0; z-index: 1; background: radial-gradient(ellipse at center, rgba(8, 9, 9, .55) 0%, rgba(8, 9, 9, .82) 70%); }
-.area__in { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; }
+.area { text-align: center; }
+.area__in { display: flex; flex-direction: column; align-items: center; padding-top: clamp(24px, 3vw, 48px); }
 .area .h2 { margin: 22px 0 36px; }
 .area__list { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px 0; max-width: 1080px; margin-bottom: 36px; }
-.area__list li { display: flex; align-items: center; font-family: var(--serif); font-size: clamp(24px, 2.6vw, 40px); line-height: 1.2; color: var(--on-dark); }
-.area__list li + li::before { content: ''; width: 8px; height: 8px; margin: 0 .7em; background: var(--brass); transform: rotate(45deg); }
-.area__text { max-width: 560px; margin-bottom: 34px; }
+.area__list li { display: flex; align-items: center; font-family: var(--serif); font-size: clamp(24px, 2.6vw, 40px); line-height: 1.2; color: var(--ink); }
+.area__list li:not(:last-child)::after { content: ''; width: 7px; height: 7px; margin: 0 .65em; background: var(--brass); transform: rotate(45deg); }
+.area__text { max-width: 560px; margin-bottom: 34px; color: var(--muted); }
 
 /* ---------- SSS ---------- */
 .faq { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(40px, 7vw, 128px); align-items: start; }
@@ -363,7 +363,7 @@ details[open] .faq__ic { transform: rotate(45deg); background: var(--ink); borde
 
 /* ---------- Hücreler ---------- */
 .cells { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(14px, 1.6vw, 22px); }
-.cell { padding: 34px 32px 38px; background: var(--ivory); border-radius: 20px; transition: transform .4s var(--ease), box-shadow .4s var(--ease); }
+.cell { padding: 34px 32px 38px; background: var(--sand); border-radius: 20px; transition: transform .4s var(--ease), box-shadow .4s var(--ease); }
 .cell:hover { transform: translateY(-6px); box-shadow: 0 30px 50px -36px rgba(30, 24, 14, .5); }
 .cell__no { display: block; margin-bottom: 40px; font-family: var(--serif); font-style: italic; font-size: 34px; line-height: 1; color: var(--brass-d); }
 .cell h3 { margin-bottom: 10px; font-family: var(--serif); font-weight: 400; font-size: 28px; line-height: 1.1; }
@@ -371,10 +371,10 @@ details[open] .faq__ic { transform: rotate(45deg); background: var(--ink); borde
 
 /* ---------- Notlar (zümrüt) ---------- */
 .notes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(20px, 2.4vw, 36px); }
-.note { padding-top: 26px; border-top: 1px solid rgba(196, 160, 106, .5); }
-.note__no { display: block; margin-bottom: 26px; font-family: var(--serif); font-style: italic; font-size: 40px; line-height: 1; color: var(--brass); }
-.note h3 { margin-bottom: 10px; font-family: var(--serif); font-weight: 400; font-size: 28px; color: var(--on-dark); }
-.note p { font-size: 15px; line-height: 1.6; }
+.note { padding-top: 26px; border-top: 1px solid var(--ink); }
+.note__no { display: block; margin-bottom: 26px; font-family: var(--serif); font-style: italic; font-size: 40px; line-height: 1; color: var(--brass-d); }
+.note h3 { margin-bottom: 10px; font-family: var(--serif); font-weight: 400; font-size: 28px; color: var(--ink); }
+.note p { font-size: 15px; line-height: 1.6; color: var(--muted); }
 
 /* ---------- Tablo ---------- */
 .table-wrap { overflow-x: auto; }

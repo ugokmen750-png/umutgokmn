@@ -8,7 +8,7 @@ import { services, photos, gallery, materials, process as steps, homeFaq, facts,
 import { brand, plaque, icon, swatch, bgTex } from './svg.mjs';
 
 const OUT = fileURLToPath(new URL('../public/', import.meta.url));
-const V = '11'; // önbellek kırıcı (css/js değişince artır)
+const V = '12'; // önbellek kırıcı (css/js değişince artır)
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const abs = (p) => site.url + p;
@@ -293,7 +293,7 @@ const colonnade = ({ exclude = null, tag = 'Hizmetlerimiz', title = 'Taşla ilgi
 </section>`;
 };
 
-const slabsBlock = () => `<section class="section section--sand" id="malzemeler">
+const slabsBlock = () => `<section class="section section--ivory" id="malzemeler">
   <div class="container">
     ${sh({ tag: 'Malzeme koleksiyonu', title: 'Her işe <em>doğru taş</em>', text: 'Taşın seçimi işin hem görünüşünü hem ömrünü belirler. En çok çalıştığımız taşlar ve kullanıldıkları yerler:' })}
     <ul class="slabs">
@@ -321,7 +321,7 @@ const worksGrid = (list) => {
 </div>`;
 };
 
-const projectsBlock = ({ list = gallery, tag = 'Projeler', title = 'Son <em>işlerimizden</em>', more = true } = {}) => `<section class="section section--emerald" id="projeler">
+const projectsBlock = ({ list = gallery, tag = 'Projeler', title = 'Son <em>işlerimizden</em>', more = true } = {}) => `<section class="section section--nero" id="projeler">
   <div class="container">
     ${sh({ tag, title, text: "Kırıkkale'de tamamladığımız işlerden birkaçı. Güncel çalışmalarımızı Instagram'da paylaşıyoruz.", light: true, link: more ? `<a class="link link--light" href="/projeler/">Tüm projeler${icon('arrow')}</a>` : '' })}
     ${worksGrid(list)}
@@ -338,14 +338,13 @@ const processBlock = () => `<section class="section section--ivory">
   </div>
 </section>`;
 
-const areaBlock = () => `<section class="area">
-  ${bgTex('nero')}
+const areaBlock = () => `<section class="section section--ivory area">
   <div class="container area__in reveal">
-    ${eyebrow('Hizmet bölgemiz', true)}
+    ${eyebrow('Hizmet bölgemiz')}
     <h2 class="h2">Kırıkkale'nin <em>dokuz ilçesinde</em></h2>
     <ul class="area__list">${districts.map((d) => `<li>${d === 'Merkez' ? 'Kırıkkale Merkez' : d}</li>`).join('')}</ul>
     <p class="area__text">Mezar, mutfak tezgahı, karo, bordür taşı, andezit ve basamak işleri için keşfe geliyoruz. İşin yerini söylemeniz yeterli.</p>
-    ${callBtn('btn--light-line')}
+    ${callBtn('btn--line')}
   </div>
 </section>`;
 
@@ -438,8 +437,8 @@ ${marquee()}
 </section>
 
 ${colonnade()}
-${slabsBlock()}
 ${projectsBlock()}
+${slabsBlock()}
 ${processBlock()}
 ${areaBlock()}
 ${faqBlock(homeFaq)}
@@ -483,7 +482,7 @@ ${pageHero({
   </div>
 </section>
 
-<section class="section section--sand">
+<section class="section section--ivory">
   <div class="container">
     ${sh({ tag: 'İlkelerimiz', title: 'Nasıl <em>çalışıyoruz</em>', text: 'Mezar da olsa merdiven de olsa, her iş aynı özeni hak eder.' })}
     <ul class="cells">
@@ -492,7 +491,6 @@ ${pageHero({
   </div>
 </section>
 
-${colonnade({ tag: 'Faaliyet alanları', title: 'Yaptığımız <em>işler</em>', text: 'Beş ana başlıkta topladığımız hizmetlerimizin her biri için ayrı bir sayfa hazırladık.', id: 'faaliyet' })}
 ${processBlock()}
 
 <section class="section section--ivory">
@@ -505,6 +503,7 @@ ${processBlock()}
 </section>
 
 ${areaBlock()}
+${colonnade({ tag: 'Faaliyet alanları', title: 'Yaptığımız <em>işler</em>', text: 'Beş ana başlıkta topladığımız hizmetlerimizin her biri için ayrı bir sayfa hazırladık.', id: 'faaliyet' })}
 ${ctaBlock()}`;
 
   return layout({
@@ -548,7 +547,7 @@ function servicePage(s, idx) {
     </div>
   </section>`;
 
-  const items = `<section class="section section--sand">
+  const items = `<section class="section section--ivory">
     <div class="container">
       ${sh({ tag: 'Hizmet kapsamı', title: s.itemsTitle })}
       <ul class="cells">
@@ -557,9 +556,9 @@ function servicePage(s, idx) {
     </div>
   </section>`;
 
-  const notes = s.notes ? `<section class="section section--emerald">
+  const notes = s.notes ? `<section class="section section--ivory">
     <div class="container">
-      ${sh({ tag: 'Bilmeniz gerekenler', title: s.notesTitle, light: true })}
+      ${sh({ tag: 'Bilmeniz gerekenler', title: s.notesTitle })}
       <ul class="notes">${s.notes.map((nt, i) => `<li class="note reveal" style="--d:${i}"><span class="note__no">${nn(i)}</span><h3>${nt.t}</h3><p>${nt.d}</p></li>`).join('')}</ul>
     </div>
   </section>` : '';
@@ -586,8 +585,8 @@ ${pageHero({
     tex: idx % 2 ? 'verde' : 'nero',
   })}
 ${intro}${items}${notes}${table}
-${gal.length ? projectsBlock({ list: gal, tag: 'Projeler', title: 'Yaptığımız <em>işlerden</em>', more: true }) : ''}
 ${faqBlock(s.faq, { title: `${s.nav} hakkında <em>sorular</em>` })}
+${gal.length ? projectsBlock({ list: gal, tag: 'Projeler', title: 'Yaptığımız <em>işlerden</em>', more: true }) : ''}
 ${colonnade({ exclude: s.slug, tag: 'Diğer hizmetler', title: 'Bunlar da <em>ilginizi</em> çekebilir', text: '', id: 'diger-hizmetler' })}
 ${ctaBlock(`${s.nav} için <em>teklif alın</em>`)}`;
 
