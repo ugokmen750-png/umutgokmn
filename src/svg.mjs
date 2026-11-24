@@ -1,4 +1,4 @@
-// SVG yardımcıları: logo, ikonlar ve SVG filtreleriyle üretilen taş dokuları (görsel dosyası gerektirmez).
+// SVG yardımcıları: logo, ikonlar, taş dokusu görselleri ve karo/basamak çizimleri.
 
 const GOLD = ['#e8d29c', '#b8914d', '#e0c283'];
 
@@ -40,6 +40,11 @@ const P = {
   layers: '<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/>',
   tool: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
   truck: '<path d="M2 6h12v10H2zM14 10h4l3 3v3h-7z"/><circle cx="6" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  ne: '<path d="M7 17 17 7M8 7h9v9"/>',
+  grid: '<rect x="3.5" y="3.5" width="7" height="7"/><rect x="13.5" y="3.5" width="7" height="7"/><rect x="3.5" y="13.5" width="7" height="7"/><rect x="13.5" y="13.5" width="7" height="7"/>',
+  building: '<path d="M4 21V5l8-3 8 3v16"/><path d="M9 21v-5h6v5M8 8h2M14 8h2M8 12h2M14 12h2"/>',
+  send: '<path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/>',
   expand: '<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>',
 };
 export const icon = (name, cls = 'i') =>
@@ -66,7 +71,7 @@ const karoArt = () => {
   return `<rect width="400" height="400" fill="#6f6a64"/>${tiles}
     <image href="${TEX}andezit.webp" width="400" height="400" preserveAspectRatio="xMidYMid slice" opacity=".5" style="mix-blend-mode:multiply"/>
     <rect y="352" width="400" height="48" fill="#5d5853"/><rect y="352" width="400" height="7" fill="#837c74"/>
-    <path d="M0 359H400" stroke="#c3a061" stroke-width="1.2" opacity=".7"/>`;
+    <path d="M0 359H400" stroke="#9a7645" stroke-width="1.2" opacity=".7"/>`;
 };
 
 const basamakArt = () => {
@@ -75,7 +80,7 @@ const basamakArt = () => {
     const x = i * 66, y = 400 - (i + 1) * 58;
     steps += `<path d="M${x} ${y}H400V${y + 58}H${x}Z" fill="#000" opacity="${0.035 + i * 0.008}"/>`;
     steps += `<path d="M${x} ${y}H400" stroke="#ffffff" stroke-width="3" opacity=".75"/>`;
-    steps += `<path d="M${x} ${y + 4}H400" stroke="#c3a061" stroke-width="1.1" opacity=".85"/>`;
+    steps += `<path d="M${x} ${y + 4}H400" stroke="#9a7645" stroke-width="1.1" opacity=".85"/>`;
     steps += `<path d="M${x} ${y}V${y + 58}" stroke="#6f6a63" stroke-width="1.2" opacity=".5"/>`;
   }
   return `<image href="${TEX}beyaz.webp" width="400" height="400" preserveAspectRatio="xMidYMid slice"/>${steps}`;

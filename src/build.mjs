@@ -1,13 +1,14 @@
 // Statik site üretici: node src/build.mjs → public/
+// Tema v2 (2026-11-25): açık taş zemin, antrasit, bronz vurgu; logodaki dört karodan türeyen ızgara.
 import { copyFile, mkdir, rm, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { site, base, districts, primaryPhone, waLink } from './config.mjs';
-import { services, photos, gallery, materials, process as steps, homeFaq } from './content.mjs';
-import { brand, plaque, icon, swatch, marbleBg, PLAQUE_PATH } from './svg.mjs';
+import { services, photos, gallery, materials, process as steps, homeFaq, facts, corporate } from './content.mjs';
+import { brand, icon, swatch } from './svg.mjs';
 
 const OUT = fileURLToPath(new URL('../public/', import.meta.url));
-const V = '6'; // önbellek kırıcı (css/js değişince artır)
+const V = '10'; // önbellek kırıcı (css/js değişince artır)
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const abs = (p) => site.url + p;
@@ -15,24 +16,40 @@ const ld = (o) => `<script type="application/ld+json">${JSON.stringify(o).replac
 const tel = (p = primaryPhone) => `tel:${p.tel}`;
 const BIZ_ID = abs('/#isletme');
 const OG = '/assets/img/og-hasbey-karo-mermer.jpg';
+const nn = (i) => String(i + 1).padStart(2, '0');
+const lower = (s) => s.toLocaleLowerCase('tr');
 
-// ---------- Ortak parçalar ----------
+// ---------- Küçük parçalar ----------
 const img = (p, { sizes = '(max-width: 700px) 92vw, 460px', eager = false, cls = '' } = {}) =>
   `<img${cls ? ` class="${cls}"` : ''} src="${p.src}-520.webp" srcset="${p.src}-520.webp 520w, ${p.src}.webp 960w" sizes="${sizes}" width="${p.w}" height="${p.h}" alt="${esc(p.alt)}" ${eager ? 'fetchpriority="high" decoding="async"' : 'loading="lazy" decoding="async"'}>`;
 
-const tiles = '<span class="tiles" aria-hidden="true"><i></i><i></i><i></i><i></i></span>';
-const eyebrow = (t, light = false) => `<p class="eyebrow${light ? ' eyebrow--light' : ''}">${tiles}${t}</p>`;
+const label = (t, { no = '', light = false } = {}) => `<p class="label${light ? ' label--light' : ''}">${no ? `<span class="label__no">${no}</span>` : '<span class="label__mark" aria-hidden="true"></span>'}${t}</p>`;
 
-const callBtn = (cls = 'btn btn--gold') => `<a class="${cls}" href="${tel()}">${icon('phone')}<span>Hemen Arayın</span></a>`;
-const waBtn = (cls = 'btn btn--ghost', text) => `<a class="${cls}" href="${waLink(text)}" target="_blank" rel="noopener">${icon('whatsapp')}<span>WhatsApp'tan Yazın</span></a>`;
+const shead = ({ no, tag, title, text = '', light = false, id = '' }) => `<header class="shead reveal"${id ? ` id="${id}"` : ''}>
+  ${label(tag, { no, light })}
+  <div class="shead__main">
+    <h2 class="h2">${title}</h2>
+    ${text ? `<p class="shead__text">${text}</p>` : ''}
+  </div>
+</header>`;
 
-const frame = (inner, cap) => `<figure class="frame">
-  <svg class="frame__line frame__line--outer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="${PLAQUE_PATH}" vector-effect="non-scaling-stroke"/></svg>
-  <div class="frame__img">${inner}</div>
-  <svg class="frame__line" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="${PLAQUE_PATH}" vector-effect="non-scaling-stroke"/></svg>
-  ${cap ? `<figcaption class="frame__cap">${icon('pin')}<span>${cap}</span></figcaption>` : ''}
-</figure>`;
+const callBtn = (cls = 'btn btn--line') => `<a class="${cls}" href="${tel()}">${icon('phone')}<span>${primaryPhone.display}</span></a>`;
+const quoteBtn = (cls = 'btn btn--dark', text = 'Teklif alın') => `<a class="${cls}" href="/iletisim/#teklif"><span>${text}</span>${icon('arrow')}</a>`;
+const waBtn = (cls = 'btn btn--line', text) => `<a class="${cls}" href="${waLink(text)}" target="_blank" rel="noopener">${icon('whatsapp')}<span>WhatsApp'tan yazın</span></a>`;
 
+// Hizmetin görseli: fotoğraf varsa fotoğraf, yoksa taş dokusu
+const svcVisual = (s, { sizes = '(max-width: 900px) 92vw, 520px', eager = false } = {}) =>
+  (s.hero ? img(photos[s.hero], { sizes, eager }) : swatch(s.swatch, 'v', 'swatch', eager));
+
+// Logodaki dört karo: 2×2 döşeme, derz aralıklı
+const mosaic = (tiles, cls = '') => `<div class="mosaic ${cls}">
+  ${tiles.map((t) => `<figure class="mosaic__tile">${t.html}<figcaption class="tag">${t.no ? `<span>${t.no}</span>` : ''}${t.cap}</figcaption></figure>`).join('\n  ')}
+</div>`;
+
+const crumbs = (items) => `<nav class="crumbs" aria-label="Sayfa yolu">${items.map(([name, href], i) =>
+  (i === items.length - 1 ? `<span aria-current="page">${name}</span>` : `<a href="${href}">${name}</a><span class="crumbs__sep" aria-hidden="true">/</span>`)).join('')}</nav>`;
+
+// ---------- Baş ----------
 function head({ title, description, path, schema = [], preload = '' }) {
   return `<head>
 <meta charset="utf-8">
@@ -41,7 +58,7 @@ function head({ title, description, path, schema = [], preload = '' }) {
 <meta name="description" content="${esc(description)}">
 <link rel="canonical" href="${abs(path)}">
 <meta name="robots" content="index, follow, max-image-preview:large">
-<meta name="theme-color" content="#0f0f10">
+<meta name="theme-color" content="#f3f1ec">
 <meta name="format-detection" content="telephone=no">
 <meta name="geo.region" content="${site.regionCode}">
 <meta name="geo.placename" content="${site.city}">
@@ -60,84 +77,126 @@ function head({ title, description, path, schema = [], preload = '' }) {
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
-<link rel="preload" href="/assets/fonts/manrope-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/assets/fonts/marcellus-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/instrument-sans-latin-standard-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/geist-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/style.css?v=${V}">
 ${preload}${schema.map(ld).join('\n')}
 </head>`;
 }
 
+// ---------- Üst bölüm ----------
 function header(active) {
   const cur = (k) => (k === active ? ' aria-current="page"' : '');
-  const svcLinks = services.map((s) => `<li><a href="/${s.slug}/"${cur(s.slug)}>${s.nav}</a></li>`).join('');
-  return `<header class="site-header" data-header>
-  <div class="container site-header__inner">
+  const inSvc = services.some((s) => s.slug === active);
+  return `<div class="topbar">
+  <div class="container topbar__in">
+    <p class="topbar__loc">${icon('pin')}<span>Kırıkkale · Merkez ve 8 ilçe</span></p>
+    <ul class="topbar__links">
+      ${site.phones.map((p) => `<li><a href="${tel(p)}"><b>${p.display}</b><span>${p.name}</span></a></li>`).join('')}
+      <li><a href="${site.instagram}" target="_blank" rel="noopener">${icon('instagram')}<b>${site.instagramHandle}</b></a></li>
+    </ul>
+  </div>
+</div>
+<header class="site-header" data-header>
+  <div class="container site-header__in">
     ${brand('hb')}
     <nav class="nav" aria-label="Ana menü">
       <ul class="nav__list">
-        <li><a href="/"${cur('home')}>Anasayfa</a></li>
+        <li><a href="/kurumsal/"${cur('kurumsal')}>Kurumsal</a></li>
         <li class="nav__drop">
-          <button class="nav__btn" type="button" aria-expanded="false" aria-controls="menu-hizmetler"${services.some((s) => s.slug === active) ? ' data-active' : ''}>Hizmetler${icon('chevron')}</button>
-          <ul class="nav__sub" id="menu-hizmetler">${svcLinks}</ul>
+          <button class="nav__btn" type="button" aria-expanded="false" aria-controls="menu-hizmetler"${inSvc ? ' data-active' : ''}>Hizmetler${icon('chevron')}</button>
+          <div class="mega" id="menu-hizmetler">
+            <div class="container mega__in">
+              <div class="mega__intro">
+                ${label('Hizmetler')}
+                <p>Kırıkkale'de taşla ilgili tüm işler; keşif, ölçü, imalat ve montaj tek ekipten.</p>
+                <a class="link" href="/#hizmetler">Tüm hizmetler${icon('arrow')}</a>
+              </div>
+              <ul class="mega__list">
+                ${services.map((s, i) => `<li><a href="/${s.slug}/"${cur(s.slug)}><span class="mega__no">${nn(i)}</span><span class="mega__txt"><b>${s.nav}</b><small>${s.kicker}</small></span>${icon('arrow')}</a></li>`).join('')}
+              </ul>
+            </div>
+          </div>
         </li>
+        <li><a href="/#malzemeler">Malzemeler</a></li>
         <li><a href="/projeler/"${cur('projeler')}>Projeler</a></li>
-        <li><a href="/#hakkimizda">Hakkımızda</a></li>
         <li><a href="/iletisim/"${cur('iletisim')}>İletişim</a></li>
       </ul>
     </nav>
-    <a class="btn btn--gold btn--sm header-call" href="${tel()}">${icon('phone')}<span>${primaryPhone.display}</span></a>
+    <div class="site-header__cta">
+      <a class="hcall" href="${tel()}"><span class="hcall__ic">${icon('phone')}</span><span class="hcall__txt"><small>Hemen arayın</small><b>${primaryPhone.display}</b></span></a>
+      ${quoteBtn('btn btn--dark btn--sm')}
+    </div>
     <button class="burger" type="button" aria-expanded="false" aria-controls="mobil-menu" aria-label="Menüyü aç">${icon('menu', 'i i--open')}${icon('close', 'i i--close')}</button>
   </div>
   <div class="mnav" id="mobil-menu" hidden>
-    <div class="container">
+    <div class="container mnav__in">
       <ul class="mnav__list">
         <li><a href="/">Anasayfa</a></li>
-        ${services.map((s) => `<li><a href="/${s.slug}/">${s.nav}</a></li>`).join('')}
+        <li><a href="/kurumsal/">Kurumsal</a></li>
         <li><a href="/projeler/">Projeler</a></li>
-        <li><a href="/#hakkimizda">Hakkımızda</a></li>
+        <li><a href="/#malzemeler">Malzemeler</a></li>
         <li><a href="/iletisim/">İletişim</a></li>
       </ul>
+      ${label('Hizmetler')}
+      <ul class="mnav__svc">${services.map((s, i) => `<li><a href="/${s.slug}/"><span>${nn(i)}</span>${s.nav}</a></li>`).join('')}</ul>
       <div class="mnav__contact">
-        ${site.phones.map((p) => `<a href="${tel(p)}">${icon('phone')}<span><b>${p.display}</b><small>${p.name}</small></span></a>`).join('')}
+        ${site.phones.map((p) => `<a href="${tel(p)}"><b>${p.display}</b><small>${p.name}</small></a>`).join('')}
       </div>
+      ${quoteBtn('btn btn--dark btn--block')}
     </div>
   </div>
 </header>`;
 }
 
+// ---------- Alt bölüm ----------
 function footer() {
   const year = site.lastmod.slice(0, 4);
   return `<footer class="site-footer">
-  <div class="container site-footer__grid">
-    <div class="site-footer__brand">
-      ${brand('fb')}
-      <p>Kırıkkale'de mezar yapımı, mutfak tezgahı, karo ve bordür taşı, andezit, basamak ve inşaat mermer işleri. Ölçü, imalat ve montaj tek elden.</p>
-      <a class="social" href="${site.instagram}" target="_blank" rel="noopener">${icon('instagram')}<span>${site.instagramHandle}</span></a>
+  <div class="container">
+    <div class="footer__top">
+      <div class="footer__brand">
+        ${brand('fb')}
+        <p>Kırıkkale'de mezar yapımı, mutfak tezgahı, karo ve bordür taşı, andezit, basamak ve inşaat mermer işleri. Ölçü, imalat ve montaj tek elden.</p>
+      </div>
+      <div class="footer__cta">
+        ${label('Teklif ve keşif', { light: true })}
+        <a class="footer__phone" href="${tel()}">${primaryPhone.display}</a>
+        <div class="footer__btns">${waBtn('btn btn--light btn--sm')}${quoteBtn('btn btn--line-light btn--sm', 'Teklif formu')}</div>
+      </div>
     </div>
-    <div>
-      <h2 class="site-footer__title">Hizmetler</h2>
-      <ul class="site-footer__links">${services.map((s) => `<li><a href="/${s.slug}/">${s.nav}</a></li>`).join('')}</ul>
+    <div class="footer__grid">
+      <div>
+        <h2 class="footer__title">Kurumsal</h2>
+        <ul class="footer__links">
+          <li><a href="/kurumsal/">Hakkımızda</a></li>
+          <li><a href="/projeler/">Projeler</a></li>
+          <li><a href="/#malzemeler">Malzemeler</a></li>
+          <li><a href="/#sss">Sık sorulan sorular</a></li>
+          <li><a href="/iletisim/">İletişim</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="footer__title">Hizmetler</h2>
+        <ul class="footer__links">${services.map((s) => `<li><a href="/${s.slug}/">${s.nav}</a></li>`).join('')}</ul>
+      </div>
+      <div>
+        <h2 class="footer__title">İletişim</h2>
+        <ul class="footer__links footer__contact">
+          ${site.phones.map((p) => `<li><a href="${tel(p)}"><b>${p.display}</b><small>${p.name}</small></a></li>`).join('')}
+          <li><a href="${site.instagram}" target="_blank" rel="noopener"><b>${site.instagramHandle}</b><small>Instagram</small></a></li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="footer__title">Hizmet bölgesi</h2>
+        <p class="footer__area">${districts.map((d) => (d === 'Merkez' ? 'Kırıkkale Merkez' : d)).join(' · ')}</p>
+      </div>
     </div>
-    <div>
-      <h2 class="site-footer__title">Kurumsal</h2>
-      <ul class="site-footer__links">
-        <li><a href="/#hakkimizda">Hakkımızda</a></li>
-        <li><a href="/projeler/">Projeler</a></li>
-        <li><a href="/#sss">Sık sorulan sorular</a></li>
-        <li><a href="/iletisim/">İletişim</a></li>
-      </ul>
+    <p class="footer__word" aria-hidden="true">Hasbey Karo Mermer</p>
+    <div class="footer__bottom">
+      <p>© ${year} ${site.name}. Tüm hakları saklıdır.</p>
+      <p>Kırıkkale mermer · mezar · karo · doğal taş</p>
     </div>
-    <div>
-      <h2 class="site-footer__title">İletişim</h2>
-      <ul class="site-footer__contact">
-        ${site.phones.map((p) => `<li><a href="${tel(p)}">${icon('phone')}<span>${p.display}<small>${p.name}</small></span></a></li>`).join('')}
-        <li><span class="loc">${icon('pin')}<span>${site.city}, Türkiye<small>Merkez ve tüm ilçeler</small></span></span></li>
-      </ul>
-    </div>
-  </div>
-  <div class="container site-footer__bottom">
-    <p>© ${year} ${site.name}. Tüm hakları saklıdır.</p>
-    <p>Kırıkkale mermer · mezar · karo · doğal taş</p>
   </div>
 </footer>`;
 }
@@ -145,6 +204,7 @@ function footer() {
 const mobileBar = () => `<div class="actionbar" aria-label="Hızlı iletişim">
   <a href="${tel()}">${icon('phone')}<span>Ara</span></a>
   <a href="${waLink()}" target="_blank" rel="noopener" class="actionbar__wa">${icon('whatsapp')}<span>WhatsApp</span></a>
+  <a href="/iletisim/#teklif" class="actionbar__q">${icon('send')}<span>Teklif</span></a>
 </div>`;
 
 const lightbox = () => `<dialog class="lightbox" aria-label="Fotoğraf görüntüleyici">
@@ -203,200 +263,183 @@ const crumbsLd = (items) => ({
 const graph = (...nodes) => ({ '@context': 'https://schema.org', '@graph': nodes });
 
 // ---------- Bölümler ----------
-const faqBlock = (list, title = 'Sık sorulan sorular', id = 'sss') => `<section class="section" id="${id}">
-  <div class="container faq">
-    <div class="faq__head reveal">
-      ${eyebrow('SSS')}
-      <h2 class="h2">${title}</h2>
-      <p>Aklınıza takılan başka bir soru varsa arayın, hemen yanıtlayalım.</p>
-      <a class="link-arrow" href="${tel()}">${primaryPhone.display}${icon('arrow')}</a>
-    </div>
-    <div class="faq__list reveal">
-      ${list.map((f, i) => `<details${i === 0 ? ' open' : ''}><summary><span>${f.q}</span><i aria-hidden="true"></i></summary><div class="faq__a"><p>${f.a}</p></div></details>`).join('')}
+const factsBar = () => `<div class="facts">
+  <div class="container">
+    <ul class="facts__list">${facts.map((f) => `<li><b>${f.k}</b><span>${f.v}</span></li>`).join('')}</ul>
+  </div>
+</div>`;
+
+const servicesIndex = ({ no = '02', exclude = null, title = 'Taşla ilgili her iş, tek çatı altında', text = "Mezardan mutfağa, bahçeden merdivene kadar Kırıkkale'de yaptığımız işler. Her başlıkta malzeme seçenekleri, süreç ve sık sorulan sorular var.", tag = 'Hizmetler', id = 'hizmetler' } = {}) => {
+  const list = services.filter((s) => s.slug !== exclude);
+  return `<section class="section" id="${id}">
+  <div class="container">
+    ${shead({ no, tag, title, text })}
+    <div class="svc">
+      <ol class="svc__list">
+        ${list.map((s, i) => `<li class="reveal"><a class="svc__row" href="/${s.slug}/" data-i="${i}">
+          <span class="svc__no">${nn(services.indexOf(s))}</span>
+          <span class="svc__thumb">${svcVisual(s, { sizes: '96px' })}</span>
+          <span class="svc__main"><b class="svc__title">${s.nav}</b><span class="svc__desc">${s.card}</span></span>
+          <span class="svc__go">${icon('arrow')}</span>
+        </a></li>`).join('')}
+      </ol>
+      <div class="svc__preview" aria-hidden="true">
+        ${list.map((s, i) => `<figure class="svc__fig${i === 0 ? ' is-active' : ''}" data-i="${i}">${svcVisual(s, { sizes: '(max-width: 1100px) 40vw, 520px' })}<figcaption class="tag"><span>${nn(services.indexOf(s))}</span>${s.kicker}</figcaption></figure>`).join('')}
+      </div>
     </div>
   </div>
 </section>`;
+};
 
-const processBlock = () => `<section class="section section--dark process">
-  ${marbleBg('pr')}
+const materialsBlock = (no = '03') => `<section class="section section--dark" id="malzemeler">
   <div class="container">
-    <div class="section-head section-head--center reveal">
-      ${eyebrow('Çalışma şeklimiz', true)}
-      <h2 class="h2">Keşiften teslime dört adım</h2>
-    </div>
+    ${shead({ no, tag: 'Malzemeler', title: 'Taş kütüphanesi', text: 'Taşın seçimi işin hem görünüşünü hem ömrünü belirler. En çok çalıştığımız taşlar ve kullanıldıkları yerler:', light: true })}
+    <ul class="mats">
+      ${materials.map((m, i) => `<li class="mat reveal" style="--d:${i % 3}">
+        <div class="mat__img">${swatch(m.key, 'm' + i)}</div>
+        <div class="mat__body">
+          <p class="mat__code">T-${nn(i)}</p>
+          <h3 class="mat__name">${m.name}</h3>
+          <p>${m.text}</p>
+          <ul class="mat__use">${m.use.map((u) => `<li>${u}</li>`).join('')}</ul>
+        </div>
+      </li>`).join('')}
+    </ul>
+  </div>
+</section>`;
+
+const worksGrid = (list, { insta = true } = {}) => `<div class="works works--n${list.length}">
+  ${list.map((p, i) => `<figure class="work reveal" style="--d:${i % 3}">
+    <button type="button" class="gallery__btn" data-full="${p.src}.webp" data-cap="${esc(p.cap)}" aria-label="${esc(p.cap)} fotoğrafını büyüt">
+      ${img(p, { sizes: '(max-width: 700px) 92vw, (max-width: 1100px) 46vw, 440px' })}
+      <span class="work__zoom">${icon('expand')}</span>
+    </button>
+    <figcaption><span class="work__tag">${p.tag} · Kırıkkale</span><b>${p.cap}</b></figcaption>
+  </figure>`).join('')}
+  ${insta ? `<a class="work work--insta reveal" href="${site.instagram}" target="_blank" rel="noopener">
+    <span class="work__insta">${icon('instagram')}<b>Güncel işlerimiz Instagram'da</b><small>${site.instagramHandle}</small><span class="link link--light">Profile git${icon('arrow')}</span></span>
+  </a>` : ''}
+</div>`;
+
+const processBlock = (no = '05') => `<section class="section section--stone">
+  <div class="container">
+    ${shead({ no, tag: 'Çalışma şeklimiz', title: 'Keşiften teslime dört adım', text: 'Her işte aynı düzenle ilerliyoruz. Böylece ne zaman, neyin yapılacağını baştan bilirsiniz.' })}
     <ol class="steps">
-      ${steps.map((s, i) => `<li class="step reveal" style="--d:${i}"><span class="step__no">0${i + 1}</span><h3>${s.t}</h3><p>${s.d}</p></li>`).join('')}
+      ${steps.map((s, i) => `<li class="step reveal" style="--d:${i}"><span class="step__no">${nn(i)}</span><h3>${s.t}</h3><p>${s.d}</p></li>`).join('')}
     </ol>
   </div>
 </section>`;
 
-const ctaBlock = (title = 'Projenizi konuşalım', text = 'Fiyat bilgisi ve keşif için arayın. İşin fotoğrafını ve yaklaşık ölçüsünü WhatsApp\'tan gönderirseniz ön bilgiyi hemen verelim.') => `<section class="cta">
-  ${marbleBg('ct')}
-  <div class="container cta__inner">
+const areaBlock = (no = '06') => `<section class="section">
+  <div class="container area">
+    <div class="area__copy reveal">
+      ${label('Hizmet bölgesi', { no })}
+      <h2 class="h2">Kırıkkale'nin dokuz ilçesinde</h2>
+      <p class="muted">Kırıkkale Merkez başta olmak üzere ilin tüm ilçelerinde mezar, mutfak tezgahı, karo, bordür taşı, andezit ve basamak işleri yapıyoruz. Keşif için işin yerini söylemeniz yeterli.</p>
+      ${callBtn('btn btn--line')}
+    </div>
+    <ul class="districts reveal">${districts.map((d, i) => `<li${d === 'Merkez' ? ' class="is-center"' : ''}><span>${d === 'Merkez' ? 'Merkez' : nn(i)}</span><b>${d === 'Merkez' ? 'Kırıkkale' : d}</b></li>`).join('')}</ul>
+  </div>
+</section>`;
+
+const faqBlock = (list, { title = 'Sık sorulan sorular', no = '07', id = 'sss' } = {}) => `<section class="section section--white" id="${id}">
+  <div class="container faq">
+    <div class="faq__head reveal">
+      ${label('SSS', { no })}
+      <h2 class="h2">${title}</h2>
+      <p class="muted">Aklınıza takılan başka bir soru varsa arayın, hemen yanıtlayalım.</p>
+      <a class="link" href="${tel()}">${primaryPhone.display}${icon('arrow')}</a>
+    </div>
+    <div class="faq__list reveal">
+      ${list.map((f, i) => `<details${i === 0 ? ' open' : ''}><summary><span class="faq__q">${f.q}</span><span class="faq__ic" aria-hidden="true">${icon('plus')}</span></summary><div class="faq__a"><p>${f.a}</p></div></details>`).join('')}
+    </div>
+  </div>
+</section>`;
+
+const ctaBlock = (title = 'Projenizi konuşalım', text = "Fiyat bilgisi ve keşif için arayın. İşin fotoğrafını ve yaklaşık ölçüsünü WhatsApp'tan gönderirseniz ön bilgiyi hemen verelim.") => `<section class="cta">
+  <div class="container cta__in">
     <div class="cta__copy reveal">
-      ${eyebrow('Teklif ve keşif', true)}
+      ${label('Teklif ve keşif', { light: true })}
       <h2 class="h2">${title}</h2>
       <p>${text}</p>
-      <div class="cta__actions">${waBtn('btn btn--gold')}<a class="btn btn--ghost" href="${site.instagram}" target="_blank" rel="noopener">${icon('instagram')}<span>Instagram</span></a></div>
+      <div class="actions">${quoteBtn('btn btn--light', 'Teklif formu')}${waBtn('btn btn--line-light')}</div>
     </div>
-    <ul class="phones reveal">
-      ${site.phones.map((p) => `<li><a href="${tel(p)}"><span class="phones__ic">${icon('phone')}</span><span><b>${p.display}</b><small>${p.name}</small></span>${icon('arrow', 'i phones__go')}</a></li>`).join('')}
+    <ul class="cta__phones reveal">
+      ${site.phones.map((p) => `<li><a href="${tel(p)}"><small>${p.name}</small><b>${p.display}</b>${icon('ne')}</a></li>`).join('')}
     </ul>
   </div>
 </section>`;
 
-const galleryBlock = (list, { heading = true } = {}) => `<div class="gallery gallery--n${list.length}">
-  ${list.map((p, i) => `<figure class="gallery__item gallery__item--${i % 5} reveal" style="--d:${i % 4}">
-    <button type="button" class="gallery__btn" data-full="${p.src}.webp" data-cap="${esc(p.cap)}" aria-label="${esc(p.cap)} fotoğrafını büyüt">
-      ${img(p, { sizes: '(max-width: 700px) 92vw, (max-width: 1100px) 46vw, 400px' })}
-      <span class="gallery__zoom">${icon('expand')}</span>
-    </button>
-    <figcaption><span>${p.tag}</span>${p.cap}</figcaption>
-  </figure>`).join('')}
-  <a class="gallery__insta reveal" href="${site.instagram}" target="_blank" rel="noopener">
-    ${swatch('koyu', 'gi', 'swatch gallery__insta-bg')}
-    <span class="gallery__insta-in">${icon('instagram')}<b>${heading ? 'Tüm işlerimiz Instagram’da' : 'Daha fazlası Instagram’da'}</b><small>${site.instagramHandle}</small><span class="link-arrow">Profile git${icon('arrow')}</span></span>
-  </a>
-</div>`;
-
-const areaBlock = () => `<section class="section area">
-  <div class="container area__grid">
-    <div class="reveal">
-      ${eyebrow('Hizmet bölgemiz')}
-      <h2 class="h2">Kırıkkale'nin her ilçesinde yanınızdayız</h2>
-      <p class="muted">Kırıkkale Merkez başta olmak üzere ilin dokuz ilçesinde mezar, mutfak tezgahı, karo, bordür taşı, andezit ve basamak işleri yapıyoruz. Keşif için işin yerini söylemeniz yeterli.</p>
+// İç sayfa başlığı
+const pageHero = ({ trail, kicker, h1, lead, actions = '', visual = '', spec = null, cls = '' }) => `<section class="phero${cls}">
+  <div class="container phero__grid${visual ? '' : ' phero__grid--solo'}">
+    <div class="phero__copy">
+      ${crumbs(trail)}
+      ${label(kicker)}
+      <h1 class="phero__title">${h1}</h1>
+      <p class="lead">${lead}</p>
+      ${actions ? `<div class="actions">${actions}</div>` : ''}
     </div>
-    <ul class="chips reveal">${districts.map((d) => `<li>${icon('pin')}${d === 'Merkez' ? 'Kırıkkale Merkez' : d}</li>`).join('')}</ul>
+    ${visual ? `<div class="phero__visual">${visual}</div>` : ''}
   </div>
+  ${spec ? `<div class="container"><dl class="spec">${spec.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl></div>` : ''}
 </section>`;
 
-const svcCard = (s, i) => {
-  const visual = s.hero ? img(photos[s.hero], { sizes: '(max-width: 700px) 92vw, 380px' }) : swatch(s.swatch, `sc${i}`);
-  return `<li class="card reveal" style="--d:${i % 3}">
-    <a href="/${s.slug}/">
-      <div class="card__media">${visual}</div>
-      <div class="card__body">
-        <span class="card__no">0${i + 1}</span>
-        <h3>${s.nav}</h3>
-        <p>${s.card}</p>
-        <span class="link-arrow">Detaylı bilgi${icon('arrow')}</span>
-      </div>
-    </a>
-  </li>`;
-};
+const tileFig = (html, cap, no = '') => `<figure class="tile">${html}<figcaption class="tag">${no ? `<span>${no}</span>` : ''}${cap}</figcaption></figure>`;
 
 // ---------- Sayfalar ----------
 function homePage() {
-  const ticker = ['Mezar Yapımı', 'Mutfak Tezgahı', 'Karo İmalatı', 'Bordür Taşı', 'Basamak', 'Andezit', 'Patinatolu Bazalt', 'Peyzaj', 'Çeşme Modelleri', 'Havuz Yapımı'];
-  const tickerRow = ticker.map((t) => `<span>${t}</span><i aria-hidden="true"></i>`).join('');
+  const heroTiles = [
+    { html: img(photos.traverten, { eager: true, sizes: '(max-width: 900px) 46vw, 330px' }), no: '01', cap: 'Aile mezarı' },
+    { html: swatch('beyaz', 'h1', 'swatch', true), cap: 'Beyaz mermer' },
+    { html: swatch('granit', 'h2', 'swatch', true), cap: 'Siyah granit' },
+    { html: img(photos.gri, { eager: true, sizes: '(max-width: 900px) 46vw, 330px' }), no: '02', cap: 'Gri mermer mezar' },
+  ];
   const body = `
 <section class="hero">
-  ${marbleBg('hr')}
-  <div class="hero__veil" aria-hidden="true"></div>
   <div class="container hero__grid">
     <div class="hero__copy">
-      ${eyebrow('Kırıkkale · Mermer · Karo · Doğal Taş', true)}
-      <h1 class="hero__title">Kırıkkale'de mermer, mezar ve karo işlerinde <em>usta işçilik</em></h1>
-      <p class="hero__lead">Mezar yapımından mutfak tezgahına, karo ve bordür taşından andezit kaplamaya kadar taşla ilgili her işi ölçüden montaja tek ekiple yapıyoruz.</p>
-      <div class="hero__actions">${callBtn()}${waBtn()}</div>
-      <ul class="hero__facts">
-        <li><strong>Tek elden</strong><span>Ölçü, imalat ve montaj</span></li>
-        <li><strong>9 ilçe</strong><span>Kırıkkale'nin tamamı</span></li>
-        <li><strong>Yerinde keşif</strong><span>Net fiyat, net süre</span></li>
-      </ul>
+      ${label('Kırıkkale · Mermer · Karo · Doğal taş')}
+      <h1 class="hero__title">Kırıkkale'de mermer, mezar ve doğal taş işleri</h1>
+      <p class="lead">Hasbey Karo Mermer; mezar yapımından mutfak tezgahına, karo ve bordür taşından andezit kaplamaya kadar taşla ilgili her işi ölçüden montaja tek ekiple yürütür.</p>
+      <div class="actions">${quoteBtn()}${callBtn()}</div>
     </div>
     <div class="hero__visual">
-      ${frame(img(photos.traverten, { eager: true, sizes: '(max-width: 900px) 80vw, 480px' }), 'Traverten aile mezarı · Kırıkkale')}
-      <ul class="hero__swatches" aria-label="Çalıştığımız taşlardan örnekler">
-        ${['beyaz', 'traverten', 'gri', 'granit'].map((k, i) => `<li style="--d:${i}">${swatch(k, 'hs' + i, 'swatch', true)}<span>${materials.find((m) => m.key === k).name}</span></li>`).join('')}
-      </ul>
+      ${mosaic(heroTiles, 'mosaic--hero')}
     </div>
   </div>
 </section>
+${factsBar()}
 
-<div class="ticker" aria-hidden="true"><div class="ticker__track">${tickerRow}${tickerRow}</div></div>
-
-<section class="section about" id="hakkimizda">
-  <div class="container about__grid">
-    <div class="about__media reveal">
-      <figure class="about__img about__img--a">${img(photos.gri, { sizes: '(max-width: 900px) 60vw, 360px' })}</figure>
-      <figure class="about__img about__img--b">${img(photos.beyaz, { sizes: '(max-width: 900px) 46vw, 280px' })}</figure>
-      <div class="about__badge">${plaque('ab')}<span>Hasbey<br>Karo Mermer</span></div>
-    </div>
+<section class="section section--white" id="hakkimizda">
+  <div class="container about">
+    <figure class="about__img reveal">${img(photos.beyaz, { sizes: '(max-width: 900px) 92vw, 440px' })}<figcaption class="tag"><span>03</span>Beyaz mermer mezar</figcaption></figure>
     <div class="about__copy reveal">
-      ${eyebrow('Hakkımızda')}
-      <h2 class="h2">Taşı tanıyan, işini yerinde yapan bir ekip</h2>
-      <p class="lead-dark">Hasbey Karo Mermer, Kırıkkale'de mermer, granit, traverten, karo ve doğal taş işleri yapan yerel bir firmadır.</p>
-      <p class="muted">Mezarlıktaki bir aile mezarından evinizdeki mutfak tezgahına, bahçenizdeki bordür taşından binanızın basamaklarına kadar her işi aynı özenle ele alıyoruz. İşe yerinde keşifle başlıyor, ölçüyü kendimiz alıyor, malzemeyi sizinle birlikte seçiyor ve montajı kendi ekibimizle yapıyoruz. Böylece işin her aşamasında muhatabınız belli olur.</p>
-      <ul class="checks">
-        <li>${icon('ruler')}<span><b>Yerinde ölçü</b>Taş, yerine milimetrik oturur.</span></li>
-        <li>${icon('layers')}<span><b>Birlikte seçim</b>Numune ve örnek işlerle karar verilir.</span></li>
-        <li>${icon('tool')}<span><b>Kendi ekibimizle montaj</b>İş başkasına devredilmez.</span></li>
+      ${label('Kurumsal', { no: '01' })}
+      <p class="statement">${corporate.statement}</p>
+      <p class="muted">${corporate.about[1]}</p>
+      <ul class="pillars">
+        ${corporate.principles.slice(0, 3).map((p, i) => `<li><span>${nn(i)}</span><b>${p.t}</b><p>${p.d}</p></li>`).join('')}
       </ul>
-      <div class="team">
-        ${site.phones.map((p) => `<a href="${tel(p)}"><b>${p.name}</b><span>${p.display}</span></a>`).join('')}
-      </div>
+      <a class="link" href="/kurumsal/">Kurumsal sayfamız${icon('arrow')}</a>
     </div>
   </div>
 </section>
 
-<section class="section section--paper" id="hizmetler">
+${servicesIndex()}
+${materialsBlock('03')}
+
+<section class="section section--white" id="projeler">
   <div class="container">
-    <div class="section-head reveal">
-      <div>
-        ${eyebrow('Hizmetlerimiz')}
-        <h2 class="h2">Taşla ilgili ne gerekiyorsa</h2>
-      </div>
-      <p class="muted">Mezardan mutfağa, bahçeden merdivene kadar Kırıkkale'de yaptığımız işler. Her başlığın altında malzeme seçenekleri, süreç ve sık sorulan soruları bulabilirsiniz.</p>
-    </div>
-    <ul class="cards">
-      ${services.map(svcCard).join('')}
-      <li class="card card--cta reveal" style="--d:2">
-        <div class="card__cta">
-          ${swatch('koyu', 'cc', 'swatch card__cta-bg')}
-          <div class="card__cta-in">
-            <h3>Aradığınız iş listede yok mu?</h3>
-            <p>Çeşme, havuz, şömine çevresi ya da özel ölçü bir iş… Arayın, yapılabilirliğini birlikte konuşalım.</p>
-            ${callBtn('btn btn--gold btn--sm')}
-          </div>
-        </div>
-      </li>
-    </ul>
+    ${shead({ no: '04', tag: 'Projeler', title: 'Son işlerimizden', text: "Kırıkkale'de tamamladığımız mezar ve mutfak işlerinden birkaçı. Güncel çalışmalarımızı Instagram'da paylaşıyoruz." })}
+    ${worksGrid(gallery)}
+    <p class="more reveal"><a class="link" href="/projeler/">Tüm projeler${icon('arrow')}</a></p>
   </div>
 </section>
 
-<section class="section section--dark materials">
-  ${marbleBg('mt')}
-  <div class="container">
-    <div class="section-head reveal">
-      <div>
-        ${eyebrow('Malzeme seçenekleri', true)}
-        <h2 class="h2">Her iş için doğru taş</h2>
-      </div>
-      <p>Taşın seçimi, işin hem görünüşünü hem ömrünü belirler. En çok çalıştığımız taşlar ve nerede kullanıldıkları:</p>
-    </div>
-    <ul class="mats">
-      ${materials.map((m, i) => `<li class="mat reveal" style="--d:${i % 3}">${swatch(m.key, 'm' + i)}<div class="mat__body"><h3>${m.name}</h3><p>${m.text}</p></div></li>`).join('')}
-    </ul>
-  </div>
-</section>
-
-<section class="section" id="projeler">
-  <div class="container">
-    <div class="section-head reveal">
-      <div>
-        ${eyebrow('Projelerimiz')}
-        <h2 class="h2">Son işlerimizden</h2>
-      </div>
-      <p class="muted">Kırıkkale'de tamamladığımız mezar ve mutfak işlerinden birkaçı. Güncel çalışmalarımızı Instagram'da paylaşıyoruz.</p>
-    </div>
-    ${galleryBlock(gallery)}
-  </div>
-</section>
-
-${processBlock()}
-${areaBlock()}
-${faqBlock(homeFaq)}
+${processBlock('05')}
+${areaBlock('06')}
+${faqBlock(homeFaq, { no: '07' })}
 ${ctaBlock()}`;
 
   return layout({
@@ -404,30 +447,130 @@ ${ctaBlock()}`;
     path: '/',
     title: 'Kırıkkale Mermer, Mezar ve Karo İşleri | Hasbey Karo Mermer',
     description: "Kırıkkale'de mezar yapımı, mutfak tezgahı, karo imalatı, bordür taşı, andezit ve basamak işleri. Hasbey Karo Mermer'de ölçü, imalat ve montaj tek elden.",
-    preload: `<link rel="preload" as="image" href="${photos.traverten.src}-520.webp" imagesrcset="${photos.traverten.src}-520.webp 520w, ${photos.traverten.src}.webp 960w" imagesizes="(max-width: 900px) 80vw, 480px">\n`,
+    preload: `<link rel="preload" as="image" href="${photos.traverten.src}-520.webp" imagesrcset="${photos.traverten.src}-520.webp 520w, ${photos.traverten.src}.webp 960w" imagesizes="(max-width: 900px) 46vw, 330px">\n`,
     schema: [graph(business(), website(), faqLd(homeFaq))],
+    body,
+  });
+}
+
+function corporatePage() {
+  const tiles = [
+    { html: swatch('traverten', 'k1', 'swatch', true), cap: 'Traverten' },
+    { html: img(photos.granit, { eager: true, sizes: '(max-width: 900px) 46vw, 300px' }), no: '01', cap: 'Granit mezar' },
+    { html: img(photos.mutfak, { eager: true, sizes: '(max-width: 900px) 46vw, 300px' }), no: '02', cap: 'Mutfak' },
+    { html: swatch('andezit', 'k2', 'swatch', true), cap: 'Andezit' },
+  ];
+  const body = `
+${pageHero({
+    trail: [['Anasayfa', '/'], ['Kurumsal', '/kurumsal/']],
+    kicker: 'Kurumsal · Hakkımızda',
+    h1: 'Hasbey Karo Mermer hakkında',
+    lead: corporate.statement,
+    actions: quoteBtn() + callBtn(),
+    visual: mosaic(tiles, 'mosaic--page'),
+  })}
+
+<section class="section section--white">
+  <div class="container split">
+    <div class="prose reveal">
+      ${label('Biz kimiz', { no: '01' })}
+      <h2 class="h2">Taşı tanıyan, işini yerinde yapan bir ekip</h2>
+      ${corporate.about.map((p) => `<p>${p}</p>`).join('')}
+    </div>
+    <aside class="panel reveal" aria-label="Kimlerle çalışıyoruz">
+      <h2 class="panel__title">Kimlerle çalışıyoruz</h2>
+      <ul class="panel__list">${corporate.clients.map((c) => `<li>${icon('check')}${c}</li>`).join('')}</ul>
+      <div class="panel__foot">${quoteBtn('btn btn--dark btn--block')}</div>
+    </aside>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    ${shead({ no: '02', tag: 'İlkelerimiz', title: 'Nasıl çalışıyoruz', text: 'Her işte aynı ilkelerle ilerliyoruz. Mezar da olsa merdiven de olsa, iş aynı özeni hak eder.' })}
+    <ul class="grid6">
+      ${corporate.principles.map((p, i) => `<li class="cell reveal" style="--d:${i % 3}"><span class="cell__no">${nn(i)}</span><h3>${p.t}</h3><p>${p.d}</p></li>`).join('')}
+    </ul>
+  </div>
+</section>
+
+${servicesIndex({ no: '03', tag: 'Faaliyet alanları', title: 'Yaptığımız işler', text: 'Beş ana başlıkta topladığımız hizmetlerimizin her biri için ayrı bir sayfa hazırladık.', id: 'faaliyet' })}
+${processBlock('04')}
+
+<section class="section section--white">
+  <div class="container">
+    ${shead({ no: '05', tag: 'İletişim kişileri', title: 'Doğrudan ulaşın', text: 'Aşağıdaki numaralardan bize doğrudan ulaşabilirsiniz. WhatsApp için ilk numarayı kullanın.' })}
+    <ul class="people">
+      ${site.phones.map((p, i) => `<li class="person reveal" style="--d:${i}"><a href="${tel(p)}"><span class="person__no">${nn(i)}</span><b class="person__name">${p.name}</b><span class="person__tel">${p.display}</span><span class="person__go">${icon('phone')}</span></a></li>`).join('')}
+    </ul>
+  </div>
+</section>
+
+${areaBlock('06')}
+${ctaBlock()}`;
+
+  return layout({
+    key: 'kurumsal',
+    path: '/kurumsal/',
+    title: 'Kurumsal – Hasbey Karo Mermer Hakkında | Kırıkkale',
+    description: "Hasbey Karo Mermer; Kırıkkale'de mezar, mermer, granit, karo ve doğal taş işlerini yerinde ölçü, kendi imalatı ve kendi montaj ekibiyle yürüten yerel firma.",
+    schema: [graph(
+      business(),
+      { '@type': 'AboutPage', name: 'Hasbey Karo Mermer hakkında', url: abs('/kurumsal/'), isPartOf: { '@id': abs('/#site') }, about: { '@id': BIZ_ID } },
+      crumbsLd([['Anasayfa', '/'], ['Kurumsal', '/kurumsal/']]),
+    )],
     body,
   });
 }
 
 function servicePage(s, idx) {
   const path = `/${s.slug}/`;
-  const visual = s.hero
-    ? frame(img(photos[s.hero], { eager: true, sizes: '(max-width: 900px) 80vw, 440px' }), `${photos[s.hero].cap} · Kırıkkale`)
-    : frame(swatch(s.swatch, 'ph', 'swatch', true), s.kicker.split(' · ')[0] + ' · Kırıkkale');
-  const others = services.filter((o) => o.slug !== s.slug);
+  const visual = tileFig(svcVisual(s, { eager: true, sizes: '(max-width: 900px) 92vw, 560px' }), s.hero ? `${photos[s.hero].cap} · Kırıkkale` : s.kicker, nn(idx));
   const gal = s.gallery.map((k) => photos[k]);
+  const waText = `Merhaba, ${lower(s.nav)} için bilgi almak istiyorum.`;
+  let n = 1;
+  const no = () => nn(n++);
 
-  const notes = s.notes ? `<section class="section">
+  const intro = `<section class="section section--white">
+    <div class="container split">
+      <div class="prose reveal">
+        ${label('Hizmet hakkında', { no: no() })}
+        <h2 class="h2">${s.introTitle}</h2>
+        ${s.intro.map((p) => `<p>${p}</p>`).join('')}
+      </div>
+      <aside class="panel reveal" aria-label="Fiyat ve keşif">
+        <h2 class="panel__title">Fiyat ve keşif</h2>
+        <p>İşin fotoğrafını ve yaklaşık ölçüsünü gönderin, ön bilgiyi hemen verelim.</p>
+        <a class="panel__phone" href="${tel()}"><small>${primaryPhone.name}</small><b>${primaryPhone.display}</b></a>
+        ${waBtn('btn btn--dark btn--block', waText)}
+        <ul class="panel__list">
+          <li>${icon('check')}Kırıkkale merkez ve 8 ilçe</li>
+          <li>${icon('check')}Yerinde ölçü ve keşif</li>
+          <li>${icon('check')}Montaj kendi ekibimizle</li>
+        </ul>
+      </aside>
+    </div>
+  </section>`;
+
+  const items = `<section class="section">
     <div class="container">
-      <div class="section-head reveal"><div>${eyebrow('Bilgi')}<h2 class="h2">${s.notesTitle}</h2></div></div>
-      <ul class="notes">${s.notes.map((n, i) => `<li class="note reveal" style="--d:${i}"><span class="note__no">0${i + 1}</span><h3>${n.t}</h3><p>${n.d}</p></li>`).join('')}</ul>
+      ${shead({ no: no(), tag: 'Hizmet kapsamı', title: s.itemsTitle })}
+      <ul class="grid6">
+        ${s.items.map((it, i) => `<li class="cell reveal" style="--d:${i % 3}"><span class="cell__no">${nn(i)}</span><h3>${it.t}</h3><p>${it.d}</p></li>`).join('')}
+      </ul>
+    </div>
+  </section>`;
+
+  const notes = s.notes ? `<section class="section section--dark">
+    <div class="container">
+      ${shead({ no: no(), tag: 'Bilmeniz gerekenler', title: s.notesTitle, light: true })}
+      <ul class="notes">${s.notes.map((nt, i) => `<li class="note reveal" style="--d:${i}"><span class="note__no">${nn(i)}</span><h3>${nt.t}</h3><p>${nt.d}</p></li>`).join('')}</ul>
     </div>
   </section>` : '';
 
-  const table = s.table ? `<section class="section">
+  const table = s.table ? `<section class="section section--white">
     <div class="container">
-      <div class="section-head reveal"><div>${eyebrow('Karşılaştırma')}<h2 class="h2">${s.table.title}</h2></div><p class="muted">Kısa bir özet. Kesin seçimi keşifte, kullanım alanınızı görerek birlikte yapıyoruz.</p></div>
+      ${shead({ no: no(), tag: 'Karşılaştırma', title: s.table.title, text: 'Kısa bir özet. Kesin seçimi keşifte, kullanım alanınızı görerek birlikte yapıyoruz.' })}
       <div class="table-wrap reveal"><table class="table">
         <thead><tr>${s.table.head.map((h) => `<th scope="col">${h}</th>`).join('')}</tr></thead>
         <tbody>${s.table.rows.map((r) => `<tr>${r.map((c, j) => (j === 0 ? `<th scope="row">${c}</th>` : `<td>${c}</td>`)).join('')}</tr>`).join('')}</tbody>
@@ -435,70 +578,27 @@ function servicePage(s, idx) {
     </div>
   </section>` : '';
 
-  const galleryHtml = gal.length ? `<section class="section section--paper">
+  const galleryHtml = gal.length ? `<section class="section">
     <div class="container">
-      <div class="section-head reveal"><div>${eyebrow('Projeler')}<h2 class="h2">Yaptığımız işlerden</h2></div></div>
-      ${galleryBlock(gal, { heading: false })}
+      ${shead({ no: no(), tag: 'Projeler', title: 'Yaptığımız işlerden' })}
+      ${worksGrid(gal)}
     </div>
   </section>` : '';
 
+  const faqNo = no();
   const body = `
-<section class="page-hero">
-  ${marbleBg('ph' + idx)}
-  <div class="hero__veil" aria-hidden="true"></div>
-  <div class="container page-hero__grid">
-    <div class="page-hero__copy">
-      <nav class="crumbs" aria-label="Sayfa yolu"><a href="/">Anasayfa</a><span aria-hidden="true">/</span><a href="/#hizmetler">Hizmetler</a><span aria-hidden="true">/</span><span aria-current="page">${s.nav}</span></nav>
-      ${eyebrow(s.kicker, true)}
-      <h1 class="page-hero__title">${s.h1}</h1>
-      <p class="hero__lead">${s.lead}</p>
-      <div class="hero__actions">${callBtn()}${waBtn('btn btn--ghost', `Merhaba, ${s.nav.toLocaleLowerCase('tr')} için bilgi almak istiyorum.`)}</div>
-    </div>
-    <div class="page-hero__visual">${visual}</div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="container split">
-    <div class="prose reveal">
-      ${eyebrow('Hizmet hakkında')}
-      <h2 class="h2">${s.introTitle}</h2>
-      ${s.intro.map((p) => `<p>${p}</p>`).join('')}
-    </div>
-    <aside class="quick reveal" aria-label="Hızlı iletişim">
-      <h2 class="quick__title">Fiyat ve keşif</h2>
-      <p>İşin fotoğrafını ve yaklaşık ölçüsünü gönderin, ön bilgiyi hemen verelim.</p>
-      <a class="quick__phone" href="${tel()}">${icon('phone')}<span><b>${primaryPhone.display}</b><small>${primaryPhone.name}</small></span></a>
-      ${waBtn('btn btn--dark btn--block', `Merhaba, ${s.nav.toLocaleLowerCase('tr')} için bilgi almak istiyorum.`)}
-      <ul class="quick__list">
-        <li>${icon('check')}Kırıkkale merkez ve 8 ilçe</li>
-        <li>${icon('check')}Yerinde ölçü ve keşif</li>
-        <li>${icon('check')}Montaj kendi ekibimizle</li>
-      </ul>
-    </aside>
-  </div>
-</section>
-
-<section class="section section--paper">
-  <div class="container">
-    <div class="section-head reveal"><div>${eyebrow('Neler yapıyoruz')}<h2 class="h2">${s.itemsTitle}</h2></div></div>
-    <ul class="items">
-      ${s.items.map((it, i) => `<li class="item reveal" style="--d:${i % 3}"><span class="item__no">0${i + 1}</span><h3>${it.t}</h3><p>${it.d}</p></li>`).join('')}
-    </ul>
-  </div>
-</section>
-
-${notes}${table}${galleryHtml}
-${processBlock()}
-${faqBlock(s.faq, `${s.nav} hakkında sorular`)}
-
-<section class="section section--paper">
-  <div class="container">
-    <div class="section-head reveal"><div>${eyebrow('Diğer hizmetler')}<h2 class="h2">Bunlar da ilginizi çekebilir</h2></div></div>
-    <ul class="cards cards--4">${others.map((o) => svcCard(o, services.indexOf(o))).join('')}</ul>
-  </div>
-</section>
-
+${pageHero({
+    trail: [['Anasayfa', '/'], ['Hizmetler', '/#hizmetler'], [s.nav, path]],
+    kicker: s.kicker,
+    h1: s.h1,
+    lead: s.lead,
+    actions: quoteBtn() + waBtn('btn btn--line', waText),
+    visual,
+    spec: [['Kapsam', s.kicker.replace(/ · /g, ', ')], ['Hizmet bölgesi', 'Kırıkkale merkez ve 8 ilçe'], ['Süreç', 'Keşif → Ölçü → İmalat → Montaj']],
+  })}
+${intro}${items}${notes}${table}${galleryHtml}
+${faqBlock(s.faq, { title: `${s.nav} hakkında sorular`, no: faqNo })}
+${servicesIndex({ no: nn(n), exclude: s.slug, tag: 'Diğer hizmetler', title: 'Bunlar da ilginizi çekebilir', text: '', id: 'diger-hizmetler' })}
 ${ctaBlock(`${s.nav} için teklif alın`)}`;
 
   return layout({
@@ -506,6 +606,7 @@ ${ctaBlock(`${s.nav} için teklif alın`)}`;
     path,
     title: s.title,
     description: s.description,
+    preload: s.hero ? `<link rel="preload" as="image" href="${photos[s.hero].src}-520.webp" imagesrcset="${photos[s.hero].src}-520.webp 520w, ${photos[s.hero].src}.webp 960w" imagesizes="(max-width: 900px) 92vw, 560px">\n` : '',
     schema: [graph(
       {
         '@type': 'Service',
@@ -527,19 +628,17 @@ ${ctaBlock(`${s.nav} için teklif alın`)}`;
 
 function projectsPage() {
   const body = `
-<section class="page-hero page-hero--short">
-  ${marbleBg('pp')}
-  <div class="hero__veil" aria-hidden="true"></div>
-  <div class="container">
-    <nav class="crumbs" aria-label="Sayfa yolu"><a href="/">Anasayfa</a><span aria-hidden="true">/</span><span aria-current="page">Projeler</span></nav>
-    ${eyebrow('Kırıkkale · Tamamlanan işler', true)}
-    <h1 class="page-hero__title">Kırıkkale mermer ve mezar projelerimiz</h1>
-    <p class="hero__lead">Kırıkkale'de yaptığımız mezar, mutfak ve taş işlerinden örnekler. Fotoğrafa dokunarak büyütebilirsiniz.</p>
-  </div>
+${pageHero({
+    trail: [['Anasayfa', '/'], ['Projeler', '/projeler/']],
+    kicker: 'Kırıkkale · Tamamlanan işler',
+    h1: 'Kırıkkale mermer ve mezar projelerimiz',
+    lead: "Kırıkkale'de yaptığımız mezar, mutfak ve taş işlerinden örnekler. Fotoğrafa dokunarak büyütebilirsiniz.",
+    actions: quoteBtn() + callBtn(),
+  })}
+<section class="section section--white">
+  <div class="container">${worksGrid(gallery)}</div>
 </section>
-<section class="section">
-  <div class="container">${galleryBlock(gallery)}</div>
-</section>
+${servicesIndex({ no: '02', tag: 'Hizmetler', title: 'Hangi işi yaptırmak istiyorsunuz?', text: 'Hizmet sayfalarında malzeme seçeneklerini, süreci ve sık sorulan soruları bulabilirsiniz.' })}
 ${ctaBlock('Sizin işiniz de burada olsun')}`;
   return layout({
     key: 'projeler',
@@ -556,31 +655,39 @@ ${ctaBlock('Sizin işiniz de burada olsun')}`;
 
 function contactPage() {
   const body = `
-<section class="page-hero page-hero--short">
-  ${marbleBg('ip')}
-  <div class="hero__veil" aria-hidden="true"></div>
-  <div class="container">
-    <nav class="crumbs" aria-label="Sayfa yolu"><a href="/">Anasayfa</a><span aria-hidden="true">/</span><span aria-current="page">İletişim</span></nav>
-    ${eyebrow('Kırıkkale · Hasbey Karo Mermer', true)}
-    <h1 class="page-hero__title">İletişim</h1>
-    <p class="hero__lead">Fiyat bilgisi, keşif randevusu ya da aklınıza takılan bir soru için doğrudan bizi arayın veya WhatsApp'tan yazın.</p>
-  </div>
-</section>
-<section class="section">
+${pageHero({
+    trail: [['Anasayfa', '/'], ['İletişim', '/iletisim/']],
+    kicker: 'Kırıkkale · Hasbey Karo Mermer',
+    h1: 'İletişim ve teklif',
+    lead: "Fiyat bilgisi, keşif randevusu ya da aklınıza takılan bir soru için doğrudan arayın, WhatsApp'tan yazın veya teklif formunu doldurun.",
+  })}
+<section class="section section--white">
   <div class="container contact">
-    <div class="contact__cards">
-      ${site.phones.map((p, i) => `<a class="ccard reveal" style="--d:${i}" href="${tel(p)}"><span class="ccard__ic">${icon('phone')}</span><span class="ccard__label">Telefon</span><b>${p.display}</b><small>${p.name}</small></a>`).join('')}
-      <a class="ccard ccard--wa reveal" href="${waLink()}" target="_blank" rel="noopener"><span class="ccard__ic">${icon('whatsapp')}</span><span class="ccard__label">WhatsApp</span><b>Mesaj gönderin</b><small>Fotoğraf ve ölçü paylaşabilirsiniz</small></a>
-      <a class="ccard reveal" href="${site.instagram}" target="_blank" rel="noopener"><span class="ccard__ic">${icon('instagram')}</span><span class="ccard__label">Instagram</span><b>${site.instagramHandle}</b><small>Güncel işlerimiz</small></a>
-      <div class="ccard ccard--static reveal"><span class="ccard__ic">${icon('pin')}</span><span class="ccard__label">Hizmet bölgesi</span><b>Kırıkkale</b><small>Merkez ve tüm ilçeler</small></div>
+    <div class="contact__info reveal">
+      ${label('Doğrudan iletişim', { no: '01' })}
+      <ul class="channels">
+        ${site.phones.map((p) => `<li><a href="${tel(p)}"><span class="channels__k">Telefon · ${p.name}</span><b>${p.display}</b>${icon('ne')}</a></li>`).join('')}
+        <li><a href="${waLink()}" target="_blank" rel="noopener"><span class="channels__k">WhatsApp</span><b>Mesaj gönderin</b>${icon('ne')}</a></li>
+        <li><a href="${site.instagram}" target="_blank" rel="noopener"><span class="channels__k">Instagram</span><b>${site.instagramHandle}</b>${icon('ne')}</a></li>
+        <li><div><span class="channels__k">Hizmet bölgesi</span><b>Kırıkkale · Merkez ve 8 ilçe</b></div></li>
+      </ul>
     </div>
-    <div class="contact__note reveal">
-      <h2 class="h3">Keşif nasıl yapılır?</h2>
-      <ol class="mini-steps">${steps.map((s) => `<li><b>${s.t}</b><span>${s.d}</span></li>`).join('')}</ol>
-    </div>
+    <form class="qform reveal" id="teklif" action="https://wa.me/${site.whatsapp}" method="get" target="_blank" data-wa="${site.whatsapp}">
+      ${label('Teklif formu', { no: '02' })}
+      <h2 class="h3">Teklif isteyin</h2>
+      <p class="muted">Formu doldurun, mesajınız WhatsApp'ta hazır açılsın. Bilgileriniz bize ancak siz WhatsApp'ta gönder'e bastığınızda ulaşır.</p>
+      <div class="qform__row">
+        <label class="field"><span>Adınız</span><input id="q-ad" type="text" autocomplete="name" placeholder="Ad Soyad"></label>
+        <label class="field"><span>İlçe</span><select id="q-ilce">${districts.map((d) => `<option>${d === 'Merkez' ? 'Kırıkkale Merkez' : d}</option>`).join('')}</select></label>
+      </div>
+      <label class="field"><span>Hizmet</span><select id="q-hizmet">${services.map((s) => `<option>${s.nav}</option>`).join('')}<option>Diğer</option></select></label>
+      <label class="field"><span>Mesajınız</span><textarea id="q-mesaj" name="text" rows="5" required placeholder="Örneğin: 2 kişilik granit mezar, yaklaşık ölçüler 2 × 1,8 m"></textarea></label>
+      <button class="btn btn--dark btn--block" type="submit">${icon('whatsapp')}<span>WhatsApp ile gönder</span></button>
+    </form>
   </div>
 </section>
-${areaBlock()}`;
+${processBlock('03')}
+${areaBlock('04')}`;
   return layout({
     key: 'iletisim',
     path: '/iletisim/',
@@ -597,14 +704,14 @@ ${areaBlock()}`;
 
 function notFoundPage() {
   const body = `
-<section class="page-hero page-hero--404">
-  ${marbleBg('nf')}
-  <div class="hero__veil" aria-hidden="true"></div>
-  <div class="container">
-    ${eyebrow('404', true)}
-    <h1 class="page-hero__title">Aradığınız sayfa bulunamadı</h1>
-    <p class="hero__lead">Sayfa taşınmış ya da hiç var olmamış olabilir. Ana sayfaya dönebilir ya da bizi doğrudan arayabilirsiniz.</p>
-    <div class="hero__actions"><a class="btn btn--gold" href="/">${icon('arrow')}<span>Ana sayfaya dön</span></a>${callBtn('btn btn--ghost')}</div>
+<section class="phero phero--404">
+  <div class="container phero__grid phero__grid--solo">
+    <div class="phero__copy">
+      ${label('Hata 404')}
+      <h1 class="phero__title">Aradığınız sayfa bulunamadı</h1>
+      <p class="lead">Sayfa taşınmış ya da hiç var olmamış olabilir. Ana sayfaya dönebilir ya da bizi doğrudan arayabilirsiniz.</p>
+      <div class="actions"><a class="btn btn--dark" href="/"><span>Ana sayfaya dön</span>${icon('arrow')}</a>${callBtn()}</div>
+    </div>
   </div>
 </section>`;
   return layout({ key: '404', path: '/404.html', title: 'Sayfa bulunamadı | Hasbey Karo Mermer', description: 'Aradığınız sayfa bulunamadı.', schema: [], body })
@@ -613,7 +720,7 @@ function notFoundPage() {
 
 // ---------- Yardımcı dosyalar ----------
 const sitemap = () => {
-  const urls = [['/', '1.0'], ...services.map((s) => [`/${s.slug}/`, '0.9']), ['/projeler/', '0.7'], ['/iletisim/', '0.7']];
+  const urls = [['/', '1.0'], ...services.map((s) => [`/${s.slug}/`, '0.9']), ['/kurumsal/', '0.7'], ['/projeler/', '0.7'], ['/iletisim/', '0.7']];
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(([p, pr]) => `  <url><loc>${abs(p)}</loc><lastmod>${site.lastmod}</lastmod><priority>${pr}</priority></url>`).join('\n')}
@@ -629,7 +736,7 @@ Sitemap: ${abs('/sitemap.xml')}
 
 const manifest = () => JSON.stringify({
   name: site.name, short_name: site.short, lang: 'tr', start_url: `${base}/`, display: 'standalone',
-  background_color: '#0f0f10', theme_color: '#0f0f10',
+  background_color: '#f3f1ec', theme_color: '#f3f1ec',
   icons: [{ src: `${base}/assets/img/logo-192.png`, sizes: '192x192', type: 'image/png' }, { src: `${base}/assets/img/logo-512.png`, sizes: '512x512', type: 'image/png' }],
 }, null, 2);
 
@@ -640,6 +747,8 @@ const favicon = () => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 
 <path fill="url(#g)" d="M20 14h20v4h-5v64h5v4H20v-4h5V18h-5z"/><path fill="#f2efe9" d="M60 14h20v4h-5v64h5v4H60v-4h5V18h-5z"/><path fill="url(#g)" d="M5 61C29 47 61 40 97 44C66 45 36 52 8 65Z"/>
 </g></svg>
 `;
+
+const CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://wa.me; object-src 'none'";
 
 // Apache/cPanel barındırma için: HTTPS, www, güvenlik başlıkları, önbellek, 404
 const htaccess = () => `# Hasbey Karo Mermer — Apache ayarları
@@ -660,7 +769,7 @@ ErrorDocument 404 /404.html
   Header always set X-Frame-Options "DENY"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
-  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+  Header always set Content-Security-Policy "${CSP}"
   <FilesMatch "\\.(webp|png|jpg|svg|woff2)$">
     Header set Cache-Control "public, max-age=31536000, immutable"
   </FilesMatch>
@@ -687,7 +796,7 @@ const headersFile = () => `/*
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
+  Content-Security-Policy: ${CSP}
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
@@ -705,15 +814,19 @@ async function put(rel, content) {
   await writeFile(file, rel.endsWith('.html') ? rebase(content) : content, 'utf8');
 }
 
-// Yazı tipleri (OFL) node_modules'tan siteye kopyalanır
+// Yazı tipleri (OFL) node_modules'tan siteye kopyalanır; eski tema dosyaları temizlenir
 const FONTS = [
-  ['@fontsource/marcellus/files/marcellus-latin-400-normal.woff2'], ['@fontsource/marcellus/files/marcellus-latin-ext-400-normal.woff2'],
-  ['@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2'], ['@fontsource-variable/manrope/files/manrope-latin-ext-wght-normal.woff2'],
+  '@fontsource-variable/instrument-sans/files/instrument-sans-latin-standard-normal.woff2',
+  '@fontsource-variable/instrument-sans/files/instrument-sans-latin-ext-standard-normal.woff2',
+  '@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2',
+  '@fontsource-variable/geist-mono/files/geist-mono-latin-ext-wght-normal.woff2',
 ];
+await rm(OUT + 'assets/fonts', { recursive: true, force: true });
 await mkdir(OUT + 'assets/fonts', { recursive: true });
-for (const [f] of FONTS) await copyFile(fileURLToPath(new URL('../node_modules/' + f, import.meta.url)), OUT + 'assets/fonts/' + f.split('/').pop());
+for (const f of FONTS) await copyFile(fileURLToPath(new URL('../node_modules/' + f, import.meta.url)), OUT + 'assets/fonts/' + f.split('/').pop());
 
 await put('index.html', homePage());
+await put('kurumsal/index.html', corporatePage());
 for (const [i, s] of services.entries()) await put(`${s.slug}/index.html`, servicePage(s, i));
 await put('projeler/index.html', projectsPage());
 await put('iletisim/index.html', contactPage());
@@ -730,4 +843,4 @@ if (!base) {
   await rm(OUT + '.htaccess', { force: true });
   await rm(OUT + '_headers', { force: true });
 }
-console.log(`Derlendi → ${OUT} (${services.length + 4} sayfa)${base ? `, alt klasör: ${base}` : ''}`);
+console.log(`Derlendi → ${OUT} (${services.length + 5} sayfa)${base ? `, alt klasör: ${base}` : ''}`);

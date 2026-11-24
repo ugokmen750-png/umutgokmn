@@ -12,13 +12,40 @@ export const photos = {
 export const gallery = [photos.traverten, photos.gri, photos.mutfak, photos.beyaz, photos.granit];
 
 export const materials = [
-  { key: 'beyaz', name: 'Beyaz Mermer', text: 'Mezar, basamak ve iç mekanda klasik, aydınlık görünüm.' },
-  { key: 'traverten', name: 'Traverten', text: 'Sıcak bej tonları; aile mezarı, duvar ve cephe kaplaması.' },
-  { key: 'gri', name: 'Gri Mermer', text: 'Belirgin damarlı dokusuyla mezar ve zemin uygulamaları.' },
-  { key: 'granit', name: 'Siyah Granit', text: 'Sert ve leke tutmaz; mezar ve mutfak tezgahı için.' },
-  { key: 'andezit', name: 'Andezit', text: 'Dona dayanıklı; bahçe, kaldırım ve dış merdiven.' },
-  { key: 'bazalt', name: 'Patinatolu Bazalt', text: 'Eskitilmiş dokulu avlu, teras ve yürüyüş yolu taşı.' },
+  { key: 'beyaz', name: 'Beyaz Mermer', text: 'Mezar, basamak ve iç mekanda klasik, aydınlık görünüm.', use: ['Mezar', 'Basamak', 'İç mekan'] },
+  { key: 'traverten', name: 'Traverten', text: 'Sıcak bej tonları; aile mezarı, duvar ve cephe kaplaması.', use: ['Aile mezarı', 'Cephe', 'Duvar'] },
+  { key: 'gri', name: 'Gri Mermer', text: 'Belirgin damarlı dokusuyla mezar ve zemin uygulamaları.', use: ['Mezar', 'Zemin'] },
+  { key: 'granit', name: 'Siyah Granit', text: 'Sert ve leke tutmaz; mezar ve mutfak tezgahı için.', use: ['Mezar', 'Tezgah', 'Dış merdiven'] },
+  { key: 'andezit', name: 'Andezit', text: 'Dona dayanıklı; bahçe, kaldırım ve dış merdiven.', use: ['Bahçe', 'Kaldırım', 'Havuz kenarı'] },
+  { key: 'bazalt', name: 'Patinatolu Bazalt', text: 'Eskitilmiş dokulu avlu, teras ve yürüyüş yolu taşı.', use: ['Avlu', 'Teras', 'Yürüyüş yolu'] },
 ];
+
+// Ana sayfa bilgi şeridi (uydurma sayı yok: hepsi sitedeki gerçek kapsamdan)
+export const facts = [
+  { k: 'Tek ekip', v: 'Ölçü, imalat ve montaj' },
+  { k: '9 ilçe', v: "Kırıkkale'nin tamamında hizmet" },
+  { k: '5 hizmet alanı', v: 'Mezardan inşaat mermerine' },
+  { k: 'Yerinde keşif', v: 'Net fiyat, net teslim tarihi' },
+];
+
+// Kurumsal sayfa
+export const corporate = {
+  statement: "Hasbey Karo Mermer, Kırıkkale'de mermer, granit, traverten, karo ve doğal taş işlerini tek çatı altında yürüten yerel bir firmadır.",
+  about: [
+    'Mezarlıktaki bir aile mezarından evinizdeki mutfak tezgahına, bahçenizdeki bordür taşından binanızın basamaklarına kadar taşla ilgili her işi aynı özenle ele alıyoruz.',
+    'İşe yerinde keşifle başlıyor, ölçüyü kendimiz alıyor, malzemeyi sizinle birlikte seçiyor ve montajı kendi ekibimizle yapıyoruz. Böylece işin her aşamasında muhatabınız bellidir; iş başkasına devredilmez.',
+    "Kırıkkale'nin iklimini ve zeminini bilen bir ekip olarak dona, neme ve aşınmaya dayanıklı malzemeyi işin yerine göre öneriyoruz. Ev sahipleri, aileler, müteahhitler ve site yönetimleriyle çalışıyoruz.",
+  ],
+  principles: [
+    { t: 'Yerinde ölçü', d: 'Ölçüyü kendimiz alırız. Taş yerine milimetrik oturur, sonradan düzeltme gerekmez.' },
+    { t: 'Birlikte seçim', d: 'Numuneler ve daha önce yaptığımız işler üzerinden taşa ve modele birlikte karar veririz.' },
+    { t: 'Kendi ekibimizle montaj', d: 'İmalatı yapan ekip montajı da yapar. İş taşeronlara dağıtılmaz.' },
+    { t: 'Doğru taş, doğru yer', d: 'Dış mekanda dona dayanıklı, mutfakta lekeye dayanıklı taşı öneririz; gösterişi değil kullanımı esas alırız.' },
+    { t: 'Açık fiyat', d: 'Keşiften sonra kalem kalem net fiyat ve teslim tarihi veririz.' },
+    { t: 'Temiz teslim', d: 'Montaj bitince alanı temizler, işi yerinde birlikte kontrol ederek teslim ederiz.' },
+  ],
+  clients: ['Aileler ve ev sahipleri', 'Müteahhitler', 'Site ve apartman yönetimleri', 'İş yerleri', 'Cami ve vakıf hayratları'],
+};
 
 export const process = [
   { t: 'Keşif ve ölçü', d: 'Yerinde inceliyor, ölçüyü kendimiz alıyoruz. İşin kapsamını ve süresini baştan konuşuyoruz.' },
