@@ -1,4 +1,5 @@
-// Taş dokularını bir kez üretir: node src/textures.mjs → public/assets/img/tex/*.webp
+// Taş dokularını bir kez üretir: node src/textures.mjs [ad ad …] → public/assets/img/tex/*.webp
+// Ad verilirse yalnız o dokular üretilir (ör. node src/textures.mjs nero calacatta).
 // Tarayıcıda SVG filtresi hesaplatmak yerine hazır resim kullanılır (mobilde hızlı).
 import { deflateSync } from 'node:zlib';
 import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
@@ -53,7 +54,9 @@ const mix = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[
 const clamp = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const smooth = (e0, e1, x) => { const t = clamp((x - e0) / (e1 - e0)); return t * t * (3 - 2 * t); };
 
+const ONLY = new Set(process.argv.slice(2));
 function render(name, w, h, shade, quality = 72) {
+  if (ONLY.size && !ONLY.has(name)) return;
   const rgb = Buffer.alloc(w * h * 3);
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     const c = shade(x, y);
@@ -181,6 +184,127 @@ whiteMarble('beyaz', 11);
     col = mix(col, hex('#121314'), smooth(0.4, 0.55, pit) * 0.75);
     return col;
   });
+}
+
+// ---------- Tema v3: büyük, gerçekçi levhalar ----------
+// Damar = gürültünün sıfır geçişi (|fbm| ≈ 0): paralel bant değil, dallanan doğal ağ.
+// Düşük oktav = sakin çizgi; kalınlık (w) damar boyunca gürültüyle değişir.
+const ridgeV = (n, x, y, s, oct, w) => clamp(1 - Math.abs(n.fbm(x / s, y / s, oct)) / w);
+const flow = (wn, x, y, { ang = 0.5, stretch = 2, warp = 0, ws = 600 }) => {
+  const ca = Math.cos(ang), sa = Math.sin(ang);
+  let u = x * ca + y * sa, v = (-x * sa + y * ca) * stretch;
+  if (warp) { u += wn.fbm(x / ws, y / ws, 3) * warp; v += wn.fbm(x / ws + 17.3, y / ws + 5.1, 3) * warp; }
+  return [u, v];
+};
+const grain = (n, x, y, amp) => n.noise(x / 1.7, y / 1.7) * amp;
+const width = (n, x, y, s, lo, hi) => lo + (hi - lo) * smooth(-0.35, 0.35, n.fbm(x / s, y / s, 2));
+
+// Nero Marquina: siyah zemin, değişken kalınlıkta beyaz damarlar, ince kırık ağ
+{
+  const n1 = makeNoise(311), n2 = makeNoise(312), n3 = makeNoise(313), n4 = makeNoise(314), n5 = makeNoise(315), n6 = makeNoise(316), n7 = makeNoise(317);
+  const base = hex("#09090a"), cloud = hex("#1a1a1d"), white = hex("#e8e4db"), haze = hex("#2e2e33");
+  render("nero", 2400, 1400, (x, y) => {
+    const c = n4.fbm(x / 820, y / 560, 5);
+    let col = mix(base, cloud, smooth(-0.3, 0.55, c));
+    const [u, v] = flow(n2, x, y, { ang: 0.5, stretch: 2.6, warp: 420, ws: 900 });
+    const w = width(n7, x, y, 260, 0.0035, 0.016);
+    const main = ridgeV(n1, u, v, 2400, 3, w);
+    const halo = ridgeV(n1, u, v, 2400, 3, w * 5);
+    const fade = smooth(-0.45, 0.1, n5.fbm(x / 900 + 3, y / 900, 2));
+    const [u2, v2] = flow(n2, x + 900, y, { ang: -0.3, stretch: 2, warp: 260, ws: 600 });
+    const sec = ridgeV(n3, u2, v2, 900, 3, width(n7, x + 99, y, 180, 0.002, 0.009)) * smooth(-0.1, 0.35, n5.fbm(x / 700, y / 700, 3));
+    const web = ridgeV(n6, x, y, 260, 3, 0.0045) * smooth(0.1, 0.45, n5.fbm(x / 420 + 7, y / 420, 3));
+    col = mix(col, haze, clamp(halo * 0.45 * fade));
+    col = mix(col, white, clamp(main * 0.95 * fade + sec * 0.55 + web * 0.22));
+    const g = grain(n4, x, y, 3.5);
+    return [col[0] + g, col[1] + g, col[2] + g];
+  }, 82);
+}
+
+// Calacatta: sıcak beyaz zemin, gri-altın, yumuşak kenarlı damarlar
+{
+  const n1 = makeNoise(411), n2 = makeNoise(412), n3 = makeNoise(413), n4 = makeNoise(414), n5 = makeNoise(415), n7 = makeNoise(417);
+  const base = hex("#f6f3ed"), cloud = hex("#e8e2d8"), warm = hex("#f0e6d4"), grey = hex("#8a867f"), gold = hex("#c2a676"), shadow = hex("#d9d2c6");
+  render("calacatta", 1800, 1200, (x, y) => {
+    let col = mix(base, cloud, smooth(-0.2, 0.6, n4.fbm(x / 560, y / 400, 5)) * 0.8);
+    col = mix(col, warm, smooth(0.1, 0.5, n5.fbm(x / 700 + 3, y / 700, 3)) * 0.45);
+    const [u, v] = flow(n2, x, y, { ang: 0.75, stretch: 2.2, warp: 340, ws: 760 });
+    const w = width(n7, x, y, 220, 0.004, 0.017);
+    const core = ridgeV(n1, u, v, 1700, 3, w);
+    const edge = ridgeV(n1, u, v, 1700, 3, w * 3.2);
+    const soft = ridgeV(n1, u, v, 1700, 3, w * 9);
+    const fade = smooth(-0.5, 0.05, n5.fbm(x / 800 + 11, y / 800, 2));
+    const [u2, v2] = flow(n2, x, y + 600, { ang: -0.2, stretch: 1.8, warp: 200, ws: 500 });
+    const sec = ridgeV(n3, u2, v2, 700, 3, width(n7, x + 50, y, 160, 0.0015, 0.007)) * smooth(-0.1, 0.35, n5.fbm(x / 480, y / 480, 3));
+    col = mix(col, shadow, clamp(soft * 0.45 * fade));
+    col = mix(col, gold, clamp(edge * 0.5 * fade));
+    col = mix(col, grey, clamp(core * 0.8 * fade + sec * 0.4));
+    const g = grain(n4, x, y, 2.2);
+    return [col[0] + g, col[1] + g, col[2] + g];
+  }, 82);
+}
+
+// Verde: koyu zümrüt zemin, açık yeşil ve beyaz yoğun damar ağı
+{
+  const n1 = makeNoise(511), n2 = makeNoise(512), n3 = makeNoise(513), n4 = makeNoise(514), n5 = makeNoise(515), n7 = makeNoise(517);
+  const base = hex("#0c221b"), cloud = hex("#1a4033"), deep = hex("#05110d"), mint = hex("#6f9584"), white = hex("#dde5dd");
+  render("verde", 1600, 1000, (x, y) => {
+    const c = n4.fbm(x / 440, y / 330, 5);
+    let col = mix(base, cloud, smooth(-0.1, 0.55, c));
+    col = mix(col, deep, smooth(0.05, 0.5, -c) * 0.7);
+    const [u, v] = flow(n2, x, y, { ang: 0.45, stretch: 2.2, warp: 260, ws: 600 });
+    const w = width(n7, x, y, 200, 0.004, 0.02);
+    const mid = ridgeV(n1, u, v, 1100, 3, w);
+    const midH = ridgeV(n1, u, v, 1100, 3, w * 4);
+    const [u2, v2] = flow(n2, x + 400, y, { ang: 0.1, stretch: 1.6, warp: 160, ws: 380 });
+    const fine = ridgeV(n3, u2, v2, 380, 3, width(n7, x + 70, y, 140, 0.002, 0.008)) * smooth(-0.25, 0.3, n5.fbm(x / 360, y / 360, 3));
+    col = mix(col, mint, clamp(midH * 0.35 + mid * 0.4));
+    col = mix(col, white, clamp(fine * 0.55 + mid * 0.45));
+    const g = grain(n4, x, y, 3);
+    return [col[0] + g, col[1] + g, col[2] + g];
+  }, 80);
+}
+
+// Gri mermer (Bardiglio benzeri): orta gri, koyu bulutlar, değişken kalınlıkta açık damarlar — levha oranı
+{
+  const n1 = makeNoise(611), n2 = makeNoise(612), n3 = makeNoise(613), n4 = makeNoise(614), n5 = makeNoise(615), n7 = makeNoise(617);
+  const base = hex("#9a9c9e"), dark = hex("#6a6c70"), light = hex("#b9bbbc"), white = hex("#eeedea");
+  render("gri2", 900, 1300, (x, y) => {
+    const c = n4.fbm(x / 300, y / 420, 5);
+    let col = mix(base, dark, smooth(-0.15, 0.5, c));
+    col = mix(col, light, smooth(0.05, 0.45, -c) * 0.6);
+    const [u, v] = flow(n2, x, y, { ang: 1.15, stretch: 2.4, warp: 220, ws: 500 });
+    const w = width(n7, x, y, 160, 0.003, 0.014);
+    const core = ridgeV(n1, u, v, 1300, 3, w);
+    const halo = ridgeV(n1, u, v, 1300, 3, w * 4);
+    const [u2, v2] = flow(n2, x + 300, y, { ang: 0.6, stretch: 1.8, warp: 140, ws: 320 });
+    const sec = ridgeV(n3, u2, v2, 520, 3, width(n7, x + 40, y, 120, 0.0015, 0.006)) * smooth(-0.15, 0.3, n5.fbm(x / 300, y / 300, 3));
+    col = mix(col, light, clamp(halo * 0.35));
+    col = mix(col, white, clamp(core * 0.9 + sec * 0.5));
+    const g = grain(n4, x, y, 4);
+    return [col[0] + g, col[1] + g, col[2] + g];
+  }, 80);
+}
+
+// Traverten: düz yatay katmanlar, ince çizgiler ve gözenekler — levha oranı
+{
+  const n1 = makeNoise(721), n2 = makeNoise(722), n3 = makeNoise(723), n4 = makeNoise(724), n5 = makeNoise(725);
+  const base = hex("#dfceac"), warm = hex("#cdb388"), light = hex("#eee4cd"), line = hex("#b59a70"), pore = hex("#8f7550"), hole = hex("#6f5a3d");
+  render("traverten2", 900, 1300, (x, y) => {
+    const wy = y + n3.fbm(x / 700, y / 700, 3) * 12;
+    const broad = n1.fbm(x / 2600, wy / 70, 4);
+    let col = mix(base, warm, smooth(0.02, 0.3, broad) * 0.7);
+    col = mix(col, light, smooth(0.02, 0.3, -broad) * 0.55);
+    const fine = n5.noise(x / 1600, wy / 4.5) + n5.noise(x / 400, wy / 9) * 0.25;
+    col = mix(col, line, smooth(0.28, 0.46, fine) * 0.35);
+    col = mix(col, light, smooth(0.28, 0.46, -fine) * 0.25);
+    const p = n2.noise(x / 6, wy / 2.4);
+    const mask = smooth(-0.05, 0.35, n4.fbm(x / 120, y / 120, 2));
+    col = mix(col, pore, smooth(0.42, 0.56, p) * mask * 0.7);
+    col = mix(col, hole, smooth(0.56, 0.66, p) * mask * 0.7);
+    const g = grain(n4, x, y, 3.5);
+    return [col[0] + g, col[1] + g, col[2] + g];
+  }, 82);
 }
 
 rmSync(TMP, { recursive: true, force: true });
