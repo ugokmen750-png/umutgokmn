@@ -269,3 +269,89 @@ export const services = [
     ],
   },
 ];
+
+
+// ---------- Doğal taş koleksiyonu (tema v5) ----------
+// Görseller: levha = yüzey yakın çekimi, uygulama = örnek kullanım. Stok fotoğraflar Pexels lisanslıdır
+// (kaynak/pexels/liste.txt) ve sitede "örnek görsel" olarak geçer; Hasbey'in kendi işleri yalnız Projeler'de.
+export const collection = [
+  {
+    slug: 'beyaz-mermer', key: 'beyaz', name: 'Beyaz Mermer', tone: 'Beyaz',
+    slab: { px: 'beyaz-levha' }, app: { px: 'beyaz-uygulama' },
+    lead: 'Beyaz zemin üzerinde ince gri damarlarıyla en klasik mermer. Mezardan mutfak tezgahına, basamaktan banyoya aydınlık ve temiz bir görünüm verir.',
+    desc: [
+      'Beyaz mermerin her plakası doğanın kendi deseniyle gelir; damarların yönü ve yoğunluğu plakadan plakaya değişir. Bu yüzden büyük yüzeylerde plakaları yan yana koyup deseni birlikte eşleştiriyoruz.',
+      'Cilalı yüzeyde parlak, honlu (mat) yüzeyde daha sakin bir görünüm verir. İç mekanda zemin, duvar, basamak ve tezgahta; mezar yapımında ise baş taşı ve kitabe için sık kullanılır.',
+    ],
+    props: [['Renk', 'Beyaz zemin, gri damar'], ['Yüzey', 'Cilalı veya honlu'], ['Kullanım', 'Mezar, basamak, tezgah, iç mekan']],
+    care: 'Limon, sirke ve kireç sökücü gibi asitli temizleyiciler yüzeyi matlaştırır; nötr bir temizleyici yeterlidir.',
+    services: ['kirikkale-mezar-yapimi', 'kirikkale-basamak-merdiven-mermer', 'kirikkale-mutfak-tezgahi'],
+  },
+  {
+    slug: 'traverten', key: 'traverten', name: 'Traverten', tone: 'Bej', card: 'slab',
+    slab: { px: 'traverten-levha' }, app: { px: 'traverten-uygulama' },
+    lead: 'Sıcak bej tonları ve doğal gözenekleriyle traverten; aile mezarından cepheye, avludan havuz kenarına kadar yumuşak ve doğal bir görünüm verir.',
+    desc: [
+      'Traverten, katman katman oluşmuş gözenekli bir doğal taştır. Gözenekler dolgulu ya da doğal bırakılabilir; kesim yönüne göre damarlı veya bulutlu görünür.',
+      "Kırıkkale'de en çok aile mezarı, duvar ve cephe kaplaması, merdiven ve dış mekan zemininde kullanıyoruz.",
+    ],
+    props: [['Renk', 'Bej, krem, açık kahve'], ['Yüzey', 'Honlu, eskitme, dolgulu'], ['Kullanım', 'Aile mezarı, cephe, avlu, havuz kenarı']],
+    care: 'Dış mekanda yılda bir koruyucu (empregnasyon) uygulaması gözeneklerin kir tutmasını azaltır.',
+    services: ['kirikkale-mezar-yapimi', 'kirikkale-andezit-bazalt-tas-kaplama', 'kirikkale-basamak-merdiven-mermer'],
+  },
+  {
+    slug: 'gri-mermer', key: 'gri', name: 'Gri Mermer', tone: 'Gri',
+    slab: { px: 'gri-levha' }, app: { px: 'gri-uygulama' },
+    lead: 'Koyu zemin üzerinde belirgin açık damarlarıyla gri mermer; ağırbaşlı, modern bir görünüm ister.',
+    desc: [
+      'Gri mermer, beyaza göre kiri ve kullanım izini daha az gösterir. Bu yüzden giriş holü, merdiven ve zemin uygulamalarında tercih edilir.',
+      'Mezar yapımında beyaz ve siyah taşla birlikte kullanıldığında katmanlı, dengeli bir görünüm verir.',
+    ],
+    props: [['Renk', 'Gri, antrasit, açık damar'], ['Yüzey', 'Cilalı veya honlu'], ['Kullanım', 'Mezar, zemin, merdiven, duvar']],
+    care: 'Düzenli silmek yeterlidir; cilalı yüzeyde aşındırıcı temizleyici kullanılmamalıdır.',
+    services: ['kirikkale-mezar-yapimi', 'kirikkale-basamak-merdiven-mermer'],
+  },
+  {
+    slug: 'siyah-granit', key: 'granit', name: 'Siyah Granit', tone: 'Siyah',
+    slab: { tex: 'granit2' }, app: { px: 'granit-uygulama' },
+    lead: 'Sert, yoğun ve leke tutmayan siyah granit; uzun ömürlü bir mezar ya da her gün kullanılan bir mutfak tezgahı için güvenli seçim.',
+    desc: [
+      'Granit, mermerden daha serttir; çizilmeye, ısıya ve dona karşı dayanıklıdır. Cilalandığında derin bir parlaklık kazanır ve bunu uzun yıllar korur.',
+      'Mezarda baş taşı ve çerçevede, mutfakta tezgah ve eviye çevresinde, dış merdivenlerde basamak olarak kullanıyoruz.',
+    ],
+    props: [['Renk', 'Siyah, gri benekli'], ['Yüzey', 'Cilalı veya alevli (pürüzlü)'], ['Kullanım', 'Mezar, mutfak tezgahı, dış merdiven']],
+    care: 'Leke tutmaz; günlük temizlik için su ve yumuşak bir bez yeterlidir.',
+    services: ['kirikkale-mezar-yapimi', 'kirikkale-mutfak-tezgahi', 'kirikkale-basamak-merdiven-mermer'],
+  },
+  {
+    slug: 'andezit', key: 'andezit', name: 'Andezit', tone: 'Gri',
+    slab: { px: 'andezit-levha' }, app: { px: 'andezit-uygulama' },
+    lead: 'Dona dayanıklı, pürüzlü yüzeyli volkanik taş andezit; bahçe, kaldırım, dış merdiven ve havuz kenarı için.',
+    desc: [
+      "Andezit, Anadolu'da yüzyıllardır dış mekanda kullanılan dayanıklı bir taştır. Patlatma, çekiçleme ya da kumlama ile yüzeyi pürüzlendirildiğinde ıslakken bile kaymaz.",
+      "Kırıkkale'nin sert kışında dona dayandığı için bahçe yolu, avlu, dış merdiven ve kaldırım işlerinde ilk önerdiğimiz taştır.",
+    ],
+    props: [['Renk', 'Gri, pembemsi gri'], ['Yüzey', 'Patlatma, çekiçleme, kumlama'], ['Kullanım', 'Bahçe, kaldırım, dış merdiven']],
+    care: 'Basınçlı su ile yıkanabilir; tuz ve kimyasal buz çözücüler uzun vadede yüzeyi yıpratır.',
+    services: ['kirikkale-andezit-bazalt-tas-kaplama', 'kirikkale-karo-bordur-tasi', 'kirikkale-basamak-merdiven-mermer'],
+  },
+  {
+    slug: 'patinatolu-bazalt', key: 'bazalt', name: 'Patinatolu Bazalt', tone: 'Antrasit',
+    slab: { px: 'bazalt-levha' }, app: { px: 'bazalt-uygulama' },
+    lead: 'Koyu rengi ve eskitilmiş kenarlarıyla patinatolu bazalt; avlu, teras ve yürüyüş yollarına yıllanmış, doğal bir hava katar.',
+    desc: [
+      'Patinato, taşın kenar ve yüzeylerinin özel bir işlemle eskitilmesidir. Bazalta yumuşatılmış köşeler ve doğal, yıllanmış bir görünüm kazandırır.',
+      'Koyu tonu yeşil alanla güzel bir kontrast oluşturur; teras, avlu ve bahçe yollarında kullanıyoruz.',
+    ],
+    props: [['Renk', 'Antrasit, siyah'], ['Yüzey', 'Patinato (eskitme)'], ['Kullanım', 'Avlu, teras, yürüyüş yolu']],
+    care: 'Dış mekanda bakım gerektirmez; derzlerdeki ot ve yosun yılda bir temizlenmelidir.',
+    services: ['kirikkale-andezit-bazalt-tas-kaplama', 'kirikkale-karo-bordur-tasi'],
+  },
+];
+
+// Giriş slaytları (örnek mekân görselleri, Pexels)
+export const slides = [
+  { px: 'hero-mutfak', kicker: 'Kırıkkale mermer, mezar ve karo işleri', title: 'Taşın en güzel hali', text: 'Mezardan mutfağa, basamaktan bahçeye; Kırıkkale’de doğal taşla ilgili her işi ölçüden montaja kendimiz yapıyoruz.', link: '/kirikkale-mutfak-tezgahi/', linkText: 'Mutfak tezgahları' },
+  { px: 'hero-banyo', kicker: 'Beyaz mermer · Traverten · Gri mermer', title: 'Doğal taşta usta işçilik', text: 'Plakaları birlikte seçiyor, ölçüyü yerinde alıyor, işi kendi ekibimizle teslim ediyoruz.', link: '/koleksiyon/', linkText: 'Taş koleksiyonu' },
+  { px: 'hero-merdiven', kicker: 'Basamak · Merdiven · Denizlik', title: 'Kalıcı, sağlam, zarif', text: 'Konut, site ve iş yeri inşaatlarında basamak, merdiven, denizlik ve zemin mermer işleri.', link: '/kirikkale-basamak-merdiven-mermer/', linkText: 'Basamak ve merdiven' },
+];

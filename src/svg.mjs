@@ -53,8 +53,8 @@ export const icon = (name, cls = 'i') =>
 // ---------- Taş dokuları ----------
 // Dokular src/textures.mjs ile bir kez WebP olarak üretilir; tarayıcı filtre hesaplamaz.
 const TEX = '/assets/img/tex/';
-const TEXSIZE = { koyu: [1600, 1000], nero: [2400, 1400], calacatta: [1800, 1200], verde: [1600, 1000], gri2: [900, 1300], traverten2: [900, 1300], granit: [420, 420], andezit: [480, 480] };
-const RASTER = new Set(['beyaz', 'gri', 'traverten', 'granit', 'andezit', 'bazalt', 'koyu', 'nero', 'calacatta', 'verde', 'gri2', 'traverten2']);
+const TEXSIZE = { koyu: [1600, 1000], nero: [2400, 1400], calacatta: [1800, 1200], verde: [1600, 1000], gri2: [900, 1300], granit2: [700, 1000], traverten2: [900, 1300], granit: [420, 420], andezit: [480, 480] };
+const RASTER = new Set(['beyaz', 'gri', 'traverten', 'granit', 'andezit', 'bazalt', 'koyu', 'nero', 'calacatta', 'verde', 'gri2', 'traverten2', 'granit2']);
 const texImg = (kind, cls, eager) => {
   const [w, h] = TEXSIZE[kind] || [600, 600];
   return `<img class="${cls}" src="${TEX}${kind}.webp" alt="" width="${w}" height="${h}" decoding="async"${eager ? '' : ' loading="lazy"'}>`;

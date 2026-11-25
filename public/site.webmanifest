@@ -4,8 +4,8 @@
   "lang": "tr",
   "start_url": "/umutgokmn/",
   "display": "standalone",
-  "background_color": "#eeebe5",
-  "theme_color": "#eeebe5",
+  "background_color": "#141414",
+  "theme_color": "#141414",
   "icons": [
     {
       "src": "/umutgokmn/assets/img/logo-192.png",

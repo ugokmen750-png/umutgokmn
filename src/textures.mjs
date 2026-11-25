@@ -307,4 +307,18 @@ const width = (n, x, y, s, lo, hi) => lo + (hi - lo) * smooth(-0.35, 0.35, n.fbm
   }, 82);
 }
 
+// Siyah granit (levha oranı): koyu zemin, gri ve açık kristal benekler
+{
+  const n1 = makeNoise(853), n2 = makeNoise(859), n3 = makeNoise(861), n4 = makeNoise(867);
+  const base = hex("#121212"), mid = hex("#262626"), gray = hex("#7d7b78"), white = hex("#e4dfd5"), mica = hex("#3c3a37");
+  render("granit2", 900, 1300, (x, y) => {
+    let col = mix(base, mid, smooth(-0.2, 0.45, n3.fbm(x / 60, y / 60, 3)));
+    col = mix(col, mica, smooth(0.1, 0.5, n4.fbm(x / 9, y / 9, 2)) * 0.5);
+    const g = n1.noise(x / 2.6, y / 2.6), w2 = n2.noise(x / 2.0 + 50, y / 2.0);
+    col = mix(col, gray, smooth(0.34, 0.52, g) * 0.8);
+    col = mix(col, white, smooth(0.45, 0.58, w2) * 0.85);
+    return col;
+  }, 80);
+}
+
 rmSync(TMP, { recursive: true, force: true });
