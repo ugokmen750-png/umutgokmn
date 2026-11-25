@@ -79,6 +79,26 @@
     slider.addEventListener('touchend', (e) => { if (sx === null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 50) { show(i + (dx < 0 ? 1 : -1)); play(); } sx = null; });
     document.addEventListener('visibilitychange', () => (document.hidden ? stop() : play()));
     play();
+
+    // arka plan video: hareket azaltma / veri tasarrufu açıksa hiç indirilmez; sayfa yüklendikten sonra başlar,
+    // ekrandan çıkınca durur. Oynatılamazsa (ör. iOS düşük güç modu) fotoğraflı slayt olduğu gibi kalır.
+    const vid = slider.querySelector('.slider__video');
+    const saveData = navigator.connection && navigator.connection.saveData;
+    if (vid && !reduce && !saveData && vid.canPlayType('video/mp4')) {
+      let visible = true;
+      const resume = () => { if (visible && !document.hidden) { const p = vid.play(); if (p) p.catch(() => {}); } };
+      const start = () => {
+        const tall = window.matchMedia('(max-width: 767px) and (orientation: portrait)').matches;
+        vid.src = tall ? vid.dataset.mp4Tall : vid.dataset.mp4;
+        vid.addEventListener('playing', () => slider.classList.add('has-video'), { once: true });
+        resume();
+        if ('IntersectionObserver' in window) {
+          new IntersectionObserver(([e]) => { visible = e.isIntersecting; visible ? resume() : vid.pause(); }).observe(slider);
+        }
+        document.addEventListener('visibilitychange', () => (document.hidden ? vid.pause() : resume()));
+      };
+      if (document.readyState === 'complete') start(); else window.addEventListener('load', start, { once: true });
+    }
   }
 
   // ---------- Taş şeridi: oklar + fareyle sürükleme ----------

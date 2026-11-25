@@ -9,7 +9,7 @@ import { services, photos, gallery, process as steps, homeFaq, corporate, collec
 import { brand, icon, swatch } from './svg.mjs';
 
 const OUT = fileURLToPath(new URL('../public/', import.meta.url));
-const V = '16'; // önbellek kırıcı (css/js değişince artır)
+const V = '17'; // önbellek kırıcı (css/js değişince artır)
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const abs = (p) => site.url + p;
@@ -356,6 +356,7 @@ const pageBand = ({ trail, h1, lead = '', bg = null }) => `<section class="pband
 function homePage() {
   const body = `
 <section class="slider" data-slider aria-label="Öne çıkanlar">
+  <video class="slider__video" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-hidden="true" data-mp4="/assets/video/hasbey-giris-1080.mp4" data-mp4-tall="/assets/video/hasbey-giris-dikey.mp4"></video>
   <div class="slider__slides">
     ${slides.map((s, i) => `<div class="slide${i === 0 ? ' is-active' : ''}" data-i="${i}" aria-hidden="${i === 0 ? 'false' : 'true'}">
       ${pxImg(s.px, { sizes: '100vw', eager: i === 0, hero: true, cls: 'slide__img', alt: '' })}
@@ -782,7 +783,7 @@ const headersFile = () => `/*
 // ---------- Yaz ----------
 // Alt klasörde yayında kök-göreli linklere (/assets/…, /projeler/) ön ek ekler; tam URL'lere (abs) dokunmaz.
 const rebase = (html) => !base ? html : html
-  .replace(/\b(href|src|data-full)="\/(?!\/)/g, `$1="${base}/`)
+  .replace(/\b(href|src|data-full|data-mp4(?:-tall)?)="\/(?!\/)/g, `$1="${base}/`)
   .replace(/\b(srcset|imagesrcset)="([^"]*)"/g, (_, a, v) => `${a}="${v.replace(/(^|,\s*)\/(?!\/)/g, `$1${base}/`)}"`);
 
 async function put(rel, content) {

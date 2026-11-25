@@ -53,3 +53,17 @@ Site, yapay zekâ desteğiyle (Claude) hazırlanmıştır.
 | banyo-siyah | [6903151](https://www.pexels.com/photo/6903151/) |
 | peyzaj-yol | [39457331](https://www.pexels.com/photo/39457331/) |
 | siyah-mermer | [6788338](https://www.pexels.com/photo/6788338/) |
+
+### Giriş videosu
+
+`public/assets/video/hasbey-giris-1080.mp4` (masaüstü, 1920×1080) ve `hasbey-giris-dikey.mp4` (telefon, 540×960)
+aşağıdaki [Pexels](https://www.pexels.com/license/) videolarından kesilip geçişlerle birleştirilmiş ~22 sn'lik döngüdür (ses yok).
+Sayfa yüklendikten sonra başlar; hareket azaltma veya veri tasarrufu açıksa indirilmez, fotoğraflı slayt kalır.
+
+| Sıra | Pexels video no |
+|---|---|
+| Siyah mermer mutfak (yavaşlatılmış) | [38231065](https://www.pexels.com/video/38231065/) |
+| Beyaz damarlı mermer yüzey | [6961607](https://www.pexels.com/video/6961607/) |
+| Güneşli mermer merdiven | [40807471](https://www.pexels.com/video/40807471/) |
+| Mermer banyo | [6694034](https://www.pexels.com/video/6694034/) |
+| Siyah mermer tezgâh | [6694041](https://www.pexels.com/video/6694041/) |
