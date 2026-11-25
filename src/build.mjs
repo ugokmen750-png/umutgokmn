@@ -9,7 +9,7 @@ import { services, photos, gallery, materials, process as steps, homeFaq, corpor
 import { brand, icon, swatch } from './svg.mjs';
 
 const OUT = fileURLToPath(new URL('../public/', import.meta.url));
-const V = '14'; // önbellek kırıcı (css/js değişince artır)
+const V = '15'; // önbellek kırıcı (css/js değişince artır)
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const abs = (p) => site.url + p;
@@ -27,6 +27,8 @@ const SVC_TEX = {
 };
 // Ana sayfada giriş fotoğrafı tekrar etmesin diye kartta farklı fotoğraf
 const CARD_PHOTO = { 'kirikkale-mezar-yapimi': 'granit' };
+// Mermer zemin: yalnız belirli yüzeylerde (sayfa başı bandı, fiyat kutusu, footer)
+const stone = (kind, eager = false) => swatch(kind, 'z', 'stone', eager);
 const SWATCH = { beyaz: 'calacatta', gri: 'gri2', traverten: 'traverten2' };
 
 // ---------- Küçük parçalar ----------
@@ -132,6 +134,7 @@ function header(active) {
 function footer() {
   const year = site.lastmod.slice(0, 4);
   return `<footer class="site-footer">
+  ${stone('nero')}
   <div class="wrap footer__grid">
     <div class="footer__brand">
       ${brand('fb')}
@@ -328,6 +331,7 @@ const faqBlock = (list, { title = 'Sık sorulan sorular', id = 'sss' } = {}) => 
 const contactBox = (title = 'Fiyat almak için', text = "İşin fotoğrafını ve yaklaşık ölçüsünü WhatsApp'tan gönderin, ön bilgiyi hemen verelim. Kesin fiyatı yerinde ölçüden sonra söylüyoruz.", msg) => `<section class="block block--last">
   <div class="wrap">
     <div class="cbox">
+      ${stone('calacatta')}
       <div class="cbox__text">
         <h2>${title}</h2>
         <p>${text}</p>
@@ -341,6 +345,7 @@ const contactBox = (title = 'Fiyat almak için', text = "İşin fotoğrafını v
 </section>`;
 
 const pageTop = ({ trail, h1, lead, actions = '', image = '', cap = '' }) => `<section class="ptop">
+  ${stone('calacatta', true)}
   <div class="wrap ptop__grid${image ? '' : ' ptop__grid--solo'}">
     <div class="ptop__text">
       ${crumbs(trail)}
@@ -356,6 +361,7 @@ const pageTop = ({ trail, h1, lead, actions = '', image = '', cap = '' }) => `<s
 function homePage() {
   const body = `
 <section class="hero">
+  ${stone('calacatta', true)}
   <div class="wrap hero__grid">
     <div class="hero__text">
       <p class="hero__place">${icon('pin')}Kırıkkale</p>
