@@ -8,7 +8,7 @@ import { services, photos, gallery, materials, process as steps, homeFaq, facts,
 import { brand, plaque, icon, swatch, bgTex } from './svg.mjs';
 
 const OUT = fileURLToPath(new URL('../public/', import.meta.url));
-const V = '12'; // önbellek kırıcı (css/js değişince artır)
+const V = '13'; // önbellek kırıcı (css/js değişince artır)
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const abs = (p) => site.url + p;
@@ -221,6 +221,7 @@ function layout({ key, title, description, path, schema, preload, body }) {
 <html lang="tr" class="no-js">
 ${head({ title, description, path, schema, preload })}
 <body class="p-${key}">
+<div class="canvas" aria-hidden="true">${bgTex('nero', true)}</div>
 <a class="skip" href="#icerik">İçeriğe geç</a>
 ${header(key)}
 <main id="icerik">
@@ -363,23 +364,24 @@ const faqBlock = (list, { title = 'Sık sorulan <em>sorular</em>', id = 'sss' } 
 </section>`;
 
 const ctaBlock = (title = 'Projenizi <em>konuşalım</em>', text = "Fiyat bilgisi ve keşif için arayın. İşin fotoğrafını ve yaklaşık ölçüsünü WhatsApp'tan gönderirseniz ön bilgiyi hemen verelim.") => `<section class="cta">
-  ${bgTex('calacatta')}
-  <div class="container cta__in">
+  <div class="container"><div class="cta__portal">
+  ${bgTex('verde')}
+  <div class="cta__in">
     <div class="cta__copy reveal">
-      ${eyebrow('Teklif ve keşif')}
+      ${eyebrow('Teklif ve keşif', true)}
       <h2 class="cta__title">${title}</h2>
       <p>${text}</p>
-      <div class="actions">${quoteBtn('btn--ink', 'Teklif formu')}${waBtn('btn--line')}</div>
+      <div class="actions">${quoteBtn('btn--brass', 'Teklif formu')}${waBtn('btn--light-line')}</div>
     </div>
     <ul class="cta__phones reveal">
       ${site.phones.map((p) => `<li><a href="${tel(p)}"><small>${p.name}</small><b>${p.display}</b>${icon('ne')}</a></li>`).join('')}
     </ul>
   </div>
+  </div></div>
 </section>`;
 
 // İç sayfa başlığı (koyu mermer zemin)
-const pageHero = ({ trail, kicker, h1, lead, actions = '', visual = '', spec = null, tex = 'nero' }) => `<section class="phero">
-  ${bgTex(tex, true)}
+const pageHero = ({ trail, kicker, h1, lead, actions = '', visual = '', spec = null }) => `<section class="phero">
   <div class="container phero__grid${visual ? '' : ' phero__grid--solo'}">
     <div class="phero__copy">
       ${crumbs(trail)}
@@ -397,7 +399,6 @@ const pageHero = ({ trail, kicker, h1, lead, actions = '', visual = '', spec = n
 function homePage() {
   const body = `
 <section class="hero">
-  ${bgTex('nero', true)}
   <div class="container hero__grid">
     <div class="hero__copy">
       ${eyebrow('Kırıkkale · Mermer · Mezar · Doğal taş', true)}
@@ -464,7 +465,6 @@ ${pageHero({
     lead: corporate.statement,
     actions: quoteBtn() + callBtn('btn--light-line'),
     visual: arch(img(photos.granit, { eager: true, sizes: '(max-width: 900px) 80vw, 420px' }), { outline: true, cap: 'Granit mezar · Kırıkkale' }),
-    tex: 'verde',
   })}
 
 <section class="section section--ivory">
@@ -582,7 +582,6 @@ ${pageHero({
     actions: quoteBtn() + waBtn('btn--light-line', waText),
     visual: arch(heroVisual(s), { outline: true, cap }),
     spec: [['Kapsam', s.kicker.replace(/ · /g, ', ')], ['Hizmet bölgesi', 'Kırıkkale merkez ve 8 ilçe'], ['Süreç', 'Keşif · Ölçü · İmalat · Montaj']],
-    tex: idx % 2 ? 'verde' : 'nero',
   })}
 ${intro}${items}${notes}${table}
 ${faqBlock(s.faq, { title: `${s.nav} hakkında <em>sorular</em>` })}
@@ -647,7 +646,6 @@ ${pageHero({
     kicker: 'Kırıkkale · Hasbey Karo Mermer',
     h1: 'İletişim ve <em>teklif</em>',
     lead: "Fiyat bilgisi, keşif randevusu ya da aklınıza takılan bir soru için doğrudan arayın, WhatsApp'tan yazın veya teklif formunu doldurun.",
-    tex: 'verde',
   })}
 <section class="section section--ivory">
   <div class="container contact">
@@ -693,7 +691,6 @@ ${areaBlock()}`;
 function notFoundPage() {
   const body = `
 <section class="phero phero--404">
-  ${bgTex('nero', true)}
   <div class="container phero__grid phero__grid--solo">
     <div class="phero__copy">
       ${eyebrow('Hata 404', true)}
