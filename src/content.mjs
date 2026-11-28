@@ -7,9 +7,20 @@ export const photos = {
   beyaz: { src: '/assets/img/mezar-beyaz', w: 960, h: 960, alt: "Kırıkkale'de beyaz mermer mezar uygulaması", cap: 'Beyaz mermer mezar', tag: 'Mezar' },
   granit: { src: '/assets/img/mezar-siyah-granit', w: 960, h: 770, alt: 'Siyah ve gri granit mezar, dalgalı baş taşı', cap: 'Granit mezar', tag: 'Mezar' },
   mutfak: { src: '/assets/img/mutfak-dolap', w: 960, h: 964, alt: 'Ledli üst dolaplı mutfak dolabı uygulaması', cap: 'Mutfak dolabı', tag: 'Mutfak' },
+  // 2026-11-28: Mert Başkan'ın WhatsApp'tan ilettiği iş fotoğrafları (kaynak/whatsapp-2026-11-28; taşlardaki adlar gizlendi)
+  mezarBeyaz: { src: '/assets/img/mezar-beyaz-mermer', w: 960, h: 1280, alt: 'Oturak taşıyla birlikte yapılmış beyaz mermer mezar', cap: 'Oturaklı beyaz mermer mezar', tag: 'Mezar' },
+  mezarTek: { src: '/assets/img/mezar-beyaz-oturakli', w: 960, h: 1280, alt: 'Kırıkkale mezarlığında tek kişilik beyaz mermer mezar ve oturak', cap: 'Tek kişilik mermer mezar', tag: 'Mezar' },
+  mezarBantli: { src: '/assets/img/mezar-gri-bantli', w: 960, h: 1280, alt: 'Gri bant detaylı mermer mezar, beton tabanı yeni dökülmüş', cap: 'Bant detaylı mermer mezar', tag: 'Mezar' },
+  mezarAile: { src: '/assets/img/mezar-aile-cercevesi', w: 960, h: 886, alt: 'İki baş taşlı aile mezarı için mermer çerçeve', cap: 'Aile mezarı çerçevesi', tag: 'Mezar' },
+  cesme: { src: '/assets/img/mermer-cesme', w: 960, h: 1280, alt: 'Ön yüzü motif oymalı gri damarlı mermer çeşme', cap: 'Oymalı mermer çeşme', tag: 'Çeşme' },
+  merdiven: { src: '/assets/img/merdiven-yahsihan', w: 960, h: 1088, alt: "Yahşihan'da bej basamaklı, siyah rıhtlı dış merdiven", cap: 'Dış merdiven basamakları', tag: 'Basamak' },
+  karo: { src: '/assets/img/karo-numuneleri', w: 960, h: 1280, alt: 'Hasbey Karo Mermer dükkânı önünde dizili renkli karo numuneleri', cap: 'Karo çeşitlerimiz', tag: 'Karo' },
 };
 
-export const gallery = [photos.traverten, photos.gri, photos.mutfak, photos.beyaz, photos.granit];
+// Ana sayfadaki seçki (ilk görsel iki satır kaplar → dikey fotoğraf)
+export const gallery = [photos.mezarBeyaz, photos.cesme, photos.merdiven, photos.karo, photos.traverten];
+// Projeler sayfası: tüm iş fotoğrafları
+export const works = [photos.mezarBeyaz, photos.mezarTek, photos.cesme, photos.mezarBantli, photos.mezarAile, photos.merdiven, photos.karo, photos.traverten, photos.gri, photos.beyaz, photos.granit, photos.mutfak];
 
 export const materials = [
   { key: 'beyaz', name: 'Beyaz Mermer', text: 'Mezar, basamak ve iç mekanda klasik, aydınlık görünüm.', use: ['Mezar', 'Basamak', 'İç mekan'] },
@@ -96,7 +107,7 @@ export const services = [
       { t: 'Zemin', d: 'Kalıcı bir mezar için sağlam temel ve suyun birikmemesi şarttır. Zemin hazırlığını biz yapıyoruz.' },
       { t: 'Bakım', d: 'Yılda birkaç kez bol suyla yıkamak yeterlidir. Asitli ve çamaşır suyu içeren temizleyiciler taşa zarar verir.' },
     ],
-    gallery: ['traverten', 'gri', 'beyaz', 'granit'],
+    gallery: ['mezarBeyaz', 'traverten', 'mezarTek', 'cesme', 'mezarBantli', 'mezarAile', 'gri', 'beyaz', 'granit'],
     faq: [
       { q: "Kırıkkale'de mezar yaptırmak ne kadar tutar?", a: 'Mezar fiyatı; seçilen taşa, mezarın ölçüsüne, kat sayısına ve yazı ile işleme detaylarına göre değişir. Yerinde keşiften sonra net fiyat veriyoruz. Ön bilgi için 0546 801 95 65\'i arayabilir ya da WhatsApp\'tan yazabilirsiniz.' },
       { q: 'Mezar yapımı ne kadar sürer?', a: 'Süre; modele, malzemenin hazır olup olmamasına ve hava koşullarına göre değişir. Keşif sırasında net bir teslim tarihi söylüyoruz.' },
@@ -180,7 +191,7 @@ export const services = [
       { t: 'Derz', d: 'Derzler eşit aralıklı ve dolgulu olur. Görüntü düzgün, yüzey sağlam kalır.' },
       { t: 'Kenar', d: 'Döşemenin kenarları bordür taşıyla sabitlenir, karo zamanla dağılmaz.' },
     ],
-    gallery: [],
+    gallery: ['karo'],
     faq: [
       { q: 'Karo döşeme fiyatı neye göre değişir?', a: 'Alanın büyüklüğüne, seçilen karonun tipine, zeminin durumuna ve bordür ihtiyacına göre değişir. Yerinde ölçüden sonra fiyat veriyoruz.' },
       { q: 'Karoyu siz mi üretiyorsunuz?', a: 'Evet, karo imalatı da yapıyoruz. Bu sayede ölçü ve renk konusunda işinize uygun seçenek sunabiliyoruz.' },
@@ -261,7 +272,7 @@ export const services = [
       { t: 'Doğru taş', d: 'Dış merdivende dona dayanıklı granit veya andezit kullanılır.' },
       { t: 'Sağlam montaj', d: 'Taşlar boşluksuz yapıştırılır, derzler düzgün kapatılır.' },
     ],
-    gallery: [],
+    gallery: ['merdiven'],
     faq: [
       { q: 'Merdiven mermeri fiyatı nasıl hesaplanır?', a: 'Basamak sayısına, basamak genişliğine, seçilen taşa ve kenar işçiliğine göre hesaplanır. Yerinde ölçüden sonra fiyat veriyoruz.' },
       { q: 'Dış merdivende hangi taşı önerirsiniz?', a: 'Dış mekanda dona ve kaymaya dayanıklı olduğu için andezit veya granit öneriyoruz.' },

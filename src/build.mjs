@@ -5,7 +5,7 @@ import { copyFile, mkdir, rm, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { site, base, districts, primaryPhone, waLink } from './config.mjs';
-import { services, photos, gallery, process as steps, homeFaq, corporate, collection, slides, quartz } from './content.mjs';
+import { services, photos, gallery, works, process as steps, homeFaq, corporate, collection, slides, quartz } from './content.mjs';
 import { brand, icon, swatch } from './svg.mjs';
 
 const OUT = fileURLToPath(new URL('../public/', import.meta.url));
@@ -243,7 +243,7 @@ const business = () => ({
   description: "Kırıkkale'de mezar yapımı, mermer ve granit mutfak tezgahı, karo imalatı, bordür taşı, andezit, basamak ve inşaat mermer işleri yapan firma.",
   url: abs('/'),
   logo: abs('/assets/img/logo-512.png'),
-  image: [abs(OG), abs(photos.traverten.src + '.webp'), abs(photos.gri.src + '.webp')],
+  image: [abs(OG), abs(photos.mezarBeyaz.src + '.webp'), abs(photos.cesme.src + '.webp'), abs(photos.traverten.src + '.webp')],
   telephone: primaryPhone.tel,
   priceRange: '₺₺',
   address: { '@type': 'PostalAddress', addressLocality: site.city, addressRegion: site.region, addressCountry: 'TR' },
@@ -809,15 +809,15 @@ ${ctaBand(`${s.nav} için teklif alın`, undefined, waText)}`;
 
 function projectsPage() {
   const body = `
-${pageBand({ trail: [['Anasayfa', '/'], ['Projeler', '/projeler/']], h1: 'Projelerimiz', lead: "Kırıkkale'de yaptığımız mezar, mutfak ve taş işlerinden örnekler.", bg: { photo: photos.gri } })}
-${projectsBlock({ h: 'Tamamlanan işler', more: false })}
+${pageBand({ trail: [['Anasayfa', '/'], ['Projeler', '/projeler/']], h1: 'Projelerimiz', lead: "Kırıkkale'de yaptığımız mezar, çeşme, merdiven, karo ve mutfak işlerinden örnekler.", bg: { photo: photos.mezarBeyaz } })}
+${projectsBlock({ list: works, h: 'Tamamlanan işler', more: false })}
 ${servicesPanels()}
 ${ctaBand('Sizin işiniz de burada olsun')}`;
   return layout({
     key: 'projeler',
     path: '/projeler/',
     title: 'Kırıkkale Mezar ve Mermer Projeleri | Hasbey Karo Mermer',
-    description: "Hasbey Karo Mermer'in Kırıkkale'de tamamladığı traverten aile mezarı, mermer ve granit mezar, mutfak dolabı ve taş işlerinden fotoğraflar.",
+    description: "Hasbey Karo Mermer'in Kırıkkale'de tamamladığı mermer ve granit mezar, aile mezarı, oymalı çeşme, merdiven, karo ve mutfak işlerinden fotoğraflar.",
     schema: [graph(
       { '@type': 'CollectionPage', name: 'Projelerimiz', url: abs('/projeler/'), isPartOf: { '@id': abs('/#site') }, about: { '@id': BIZ_ID } },
       crumbsLd([['Anasayfa', '/'], ['Projeler', '/projeler/']]),
