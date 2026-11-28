@@ -53,12 +53,16 @@ Site, yapay zekâ desteğiyle (Claude) hazırlanmıştır.
 | banyo-siyah | [6903151](https://www.pexels.com/photo/6903151/) |
 | peyzaj-yol | [39457331](https://www.pexels.com/photo/39457331/) |
 | siyah-mermer | [6788338](https://www.pexels.com/photo/6788338/) |
+| zemin/mermer-beyaz, mermer-krem (açık bölüm zemini) | [3847487](https://www.pexels.com/photo/3847487/) |
 
 ### Kuvars markaları (`/kuvars/`)
 
 Hasbey'de numune kataloğu bulunan dört kuvars markasının renkleri. Renk adları, kodlar, levha ve uygulama
 görselleri markaların resmi sitelerinden alınmıştır; görsellerin hakları markalara aittir ve her marka
 sayfasında kaynak belirtilir. Veriler `src/content.mjs` → `quartz`, görseller `public/assets/img/kuvars/<marka>/`.
+Bir renge basınca açılan panelde: tam levha, yakın plan, yüzey detayı ve markanın uygulama görseli
+(`<renk>-{tam,yakin,detay,uygulama}.webp`; üretim `kaynak/kuvars/_betikler/ornek-uret.sh`). Panel bağlantıyla
+doğrudan açılır: `/kuvars/coante/#storia`.
 
 | Marka | Koleksiyon | Kaynak |
 |---|---|---|

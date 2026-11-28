@@ -175,4 +175,38 @@
     box.addEventListener('click', (e) => { if (e.target === box) box.close(); });
     box.addEventListener('close', () => { bImg.removeAttribute('src'); last?.focus(); });
   }
+
+  // ---------- Kuvars renk paneli ----------
+  // Renge basınca o rengin <template id="q-…"> içeriği panele kopyalanır: örnek görseller + tamamlanmış iş.
+  // Paneldeki görsellere basınca yukarıdaki büyütme (lightbox) açılır. Adres #renk olur, bağlantıyla paylaşılabilir.
+  const qm = document.querySelector('.qmodal');
+  if (qm && typeof qm.showModal === 'function') {
+    const qBody = qm.querySelector('.qmodal__body');
+    let opener = null;
+    const open = (key, btn) => {
+      const t = document.getElementById('q-' + key);
+      if (!t) return;
+      qBody.replaceChildren(t.content.cloneNode(true));
+      qm.setAttribute('aria-label', t.dataset.name || 'Renk ayrıntısı');
+      opener = btn || null;
+      document.documentElement.classList.add('is-locked');
+      if (!qm.open) qm.showModal();
+      qm.scrollTop = 0;
+      history.replaceState(null, '', '#' + key);
+    };
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-q]');
+      if (b) open(b.dataset.q, b);
+    });
+    qm.querySelector('.qmodal__close').addEventListener('click', () => qm.close());
+    qm.addEventListener('click', (e) => { if (e.target === qm) qm.close(); });
+    qm.addEventListener('close', () => {
+      qBody.replaceChildren();
+      document.documentElement.classList.remove('is-locked');
+      history.replaceState(null, '', location.pathname + location.search);
+      opener?.focus({ preventScroll: true });
+    });
+    const h = decodeURIComponent(location.hash.slice(1));
+    if (h && /^[a-z0-9-]+$/.test(h)) open(h, document.querySelector(`[data-q="${h}"]`));
+  }
 })();

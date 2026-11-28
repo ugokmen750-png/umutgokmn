@@ -9,7 +9,7 @@ import { services, photos, gallery, process as steps, homeFaq, corporate, collec
 import { brand, icon, swatch } from './svg.mjs';
 
 const OUT = fileURLToPath(new URL('../public/', import.meta.url));
-const V = '18'; // önbellek kırıcı (css/js değişince artır)
+const V = '19'; // önbellek kırıcı (css/js değişince artır)
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const abs = (p) => site.url + p;
@@ -585,6 +585,45 @@ ${ctaBand('Kuvars tezgâh için fiyat alın', undefined, 'Merhaba, kuvars mutfak
   });
 }
 
+// Renk paneli içeriği: <template> içinde durur (görseller panel açılınca yüklenir), main.js .qmodal'a kopyalar.
+// Örnek görseller: tam levha, yakın plan, yüzey detayı; tamamlanmış iş = markanın uygulama görseli.
+function quartzDetail(b, c) {
+  const P = Q(b.slug, c.file);
+  const name = `${b.name} ${c.name} ${c.code}`;
+  const sample = (k, small, sw, lw, label, cls = '', sizes = '(max-width: 900px) 46vw, 340px') => `<figure class="qm__s${cls}">
+          <button type="button" class="gallery__btn" data-full="${P}-${k}.webp" data-cap="${esc(`${name} · ${lower(label)}`)}" aria-label="${esc(`${label} görselini büyüt`)}"><img src="${P}-${k}-${small}.webp" srcset="${P}-${k}-${small}.webp ${sw}w, ${P}-${k}.webp ${lw}w" sizes="${sizes}" alt="${esc(`${name} ${lower(label)}`)}" decoding="async"></button>
+          <figcaption>${label}</figcaption>
+        </figure>`;
+  return `<template id="q-${c.file}" data-name="${esc(name)}">
+  <div class="qm">
+    <div class="qm__info"><div class="qm__stick">
+      <p class="qm__kick">${b.name} · ${c.series || b.line}</p>
+      <h2 class="qm__name">${c.name}</h2>
+      <p class="qm__code">Kod ${c.code}</p>
+      <p class="qm__tone">${c.tone}</p>
+      <div class="qm__acts">
+        ${waBtn('btn--dark btn--block', "WhatsApp'tan sorun", `Merhaba, ${name} kuvars tezgâh için bilgi almak istiyorum.`)}
+        ${btn('btn--line btn--block', tel(), primaryPhone.display, { ic: 'phone' })}
+      </div>
+      <p class="qm__src">Görseller: ${b.full} (${b.siteLabel}). Ölçü, kesim ve montaj Hasbey Karo Mermer'den.</p>
+    </div></div>
+    <div class="qm__media">
+      <p class="qm__label">Örnek görseller</p>
+      <div class="qm__samples">
+        ${sample('tam', 700, 700, 1400, 'Tam levha', ' qm__s--wide', '(max-width: 900px) 92vw, 700px')}
+        ${sample('yakin', 480, 480, 960, 'Yakın plan')}
+        ${sample('detay', 480, 480, 960, 'Yüzey detayı')}
+      </div>
+      <p class="qm__label">Tamamlanmış iş örneği</p>
+      <figure class="qm__job">
+        <button type="button" class="gallery__btn" data-full="${P}-uygulama.webp" data-cap="${esc(`${name} · tamamlanmış iş örneği`)}" aria-label="Tamamlanmış iş görselini büyüt"><img src="${P}-uygulama-600.webp" srcset="${P}-uygulama-600.webp 600w, ${P}-uygulama.webp 1200w" sizes="(max-width: 900px) 92vw, 700px" alt="${esc(`${name} ile yapılmış tezgâh örneği`)}" decoding="async"></button>
+        <figcaption>${c.name} ile yapılmış tezgâh · uygulama görseli: ${b.name}</figcaption>
+      </figure>
+    </div>
+  </div>
+</template>`;
+}
+
 function quartzPage(b) {
   const path = `/kuvars/${b.slug}/`;
   const trail = [['Anasayfa', '/'], ['Kuvars Markaları', '/kuvars/'], [b.name, path]];
@@ -593,15 +632,22 @@ function quartzPage(b) {
 ${pageBand({ trail, h1: b.name, lead: `${b.full} · ${b.line}`, bg: { html: qWide(b.slug, b.bg) } })}
 <section class="sec sec--white">
   <div class="wrap">
-    ${title({ k: `${b.name} · ${b.line}`, h: 'Renkler', p: `${b.lead} Görsele dokunarak yüzeyi büyütebilirsiniz.`, center: true })}
+    ${title({ k: `${b.name} · ${b.line}`, h: 'Renkler', p: `${b.lead} Bir renge dokunun: örnek görselleri ve tamamlanmış iş görseli açılır.`, center: true })}
     <ul class="qgrid">
       ${b.colors.map((c, i) => `<li class="qcolor reveal" style="--d:${i % 3}">
-        <button type="button" class="gallery__btn qcolor__img" data-full="${Q(b.slug, c.file)}-levha.webp" data-cap="${esc(`${b.name} ${c.name} ${c.code}`)}" aria-label="${esc(`${c.name} yüzeyini büyüt`)}">${qSlab(b.slug, c)}</button>
-        <div class="qcolor__body"><b>${c.name}</b><small>${c.code}${c.series ? ` · ${c.series}` : ''}</small><span>${c.tone}</span></div>
+        <button type="button" class="qcolor__btn" data-q="${c.file}" aria-haspopup="dialog" aria-label="${esc(`${c.name} ${c.code}: örnek görseller ve tamamlanmış iş`)}">
+          <span class="qcolor__img">${qSlab(b.slug, c)}<span class="qcolor__hint">İncele ${icon('arrow')}</span></span>
+          <span class="qcolor__body"><b>${c.name}</b><small>${c.code}${c.series ? ` · ${c.series}` : ''}</small><span>${c.tone}</span></span>
+        </button>
       </li>`).join('')}
     </ul>
   </div>
 </section>
+${b.colors.map((c) => quartzDetail(b, c)).join('\n')}
+<dialog class="qmodal" aria-label="Renk ayrıntısı">
+  <button class="qmodal__close" type="button" aria-label="Kapat">${icon('close')}</button>
+  <div class="qmodal__body"></div>
+</dialog>
 <section class="sec sec--cream">
   <div class="wrap">
     ${title({ k: 'Bitmiş görünüm', h: 'Uygulama örnekleri', p: 'Aynı renklerin mutfak ve banyo tezgâhında görünümü. Görseller markanın kendi uygulama görselleridir.', center: true })}
