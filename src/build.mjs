@@ -5,11 +5,11 @@ import { copyFile, mkdir, rm, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { site, base, districts, primaryPhone, waLink } from './config.mjs';
-import { services, photos, gallery, process as steps, homeFaq, corporate, collection, slides } from './content.mjs';
+import { services, photos, gallery, process as steps, homeFaq, corporate, collection, slides, quartz } from './content.mjs';
 import { brand, icon, swatch } from './svg.mjs';
 
 const OUT = fileURLToPath(new URL('../public/', import.meta.url));
-const V = '17'; // önbellek kırıcı (css/js değişince artır)
+const V = '18'; // önbellek kırıcı (css/js değişince artır)
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const abs = (p) => site.url + p;
@@ -47,6 +47,16 @@ const svcBg = (s) => { const v = SVC_VIS[s.slug]; return v.photo ? { photo: phot
 
 const slabImg = (m, opts = {}) => (m.slab.px ? pxImg(m.slab.px, { alt: `${m.name} yüzey örneği`, ...opts }) : swatch(m.slab.tex, 's', 'swatch'));
 const appImg = (m, opts = {}) => pxImg(m.app.px, { alt: `Örnek uygulama: ${lower(m.name)}`, ...opts });
+
+// Kuvars markaları: levha (4:3, 480/960), uygulama (3:2, 600/1200), geniş (16:9 sayfa başı), 120 px renk çipi
+const Q = (b, f) => `/assets/img/kuvars/${b}/${f}`;
+const LAZY = 'loading="lazy" decoding="async"';
+const qSlab = (b, c, { sizes = '(max-width: 700px) 46vw, (max-width: 1100px) 30vw, 380px' } = {}) =>
+  `<img src="${Q(b, c.file)}-levha-480.webp" srcset="${Q(b, c.file)}-levha-480.webp 480w, ${Q(b, c.file)}-levha.webp 960w" sizes="${sizes}" width="960" height="720" alt="${esc(`${c.name} ${c.code} kuvars yüzey`)}" ${LAZY}>`;
+const qApp = (b, c, { sizes = '(max-width: 700px) 92vw, (max-width: 1100px) 46vw, 440px' } = {}) =>
+  `<img src="${Q(b, c.file)}-uygulama-600.webp" srcset="${Q(b, c.file)}-uygulama-600.webp 600w, ${Q(b, c.file)}-uygulama.webp 1200w" sizes="${sizes}" width="1200" height="800" alt="${esc(`Örnek uygulama: ${c.name} kuvars tezgâh`)}" ${LAZY}>`;
+const qWide = (b, f) => `<img src="${Q(b, f)}-genis.webp" width="1920" height="1080" alt="" fetchpriority="high" decoding="async">`;
+const qBg = (b) => b.colors.find((c) => c.file === b.bg);
 
 // ---------- Küçük parçalar ----------
 const kicker = (t) => `<p class="kicker">${t}</p>`;
@@ -104,6 +114,7 @@ function header(active) {
   const cur = (k) => (k === active ? ' aria-current="page"' : '');
   const inSvc = services.some((s) => s.slug === active);
   const inCol = active === 'koleksiyon' || collection.some((m) => m.slug === active);
+  const inQ = active === 'kuvars' || active.startsWith('kuvars-');
   return `<header class="hdr" data-header>
   <div class="wrap hdr__in">
     ${brand('hb')}
@@ -116,6 +127,13 @@ function header(active) {
           <ul class="dropdown" id="dd-koleksiyon">
             ${collection.map((m) => `<li><a href="/koleksiyon/${m.slug}/"${cur(m.slug)}>${m.name}</a></li>`).join('')}
             <li class="dropdown__all"><a href="/koleksiyon/">Tüm koleksiyon</a></li>
+          </ul>
+        </li>
+        <li class="nav__drop">
+          <button class="nav__btn" type="button" aria-expanded="false" aria-controls="dd-kuvars"${inQ ? ' data-active' : ''}>Kuvars${icon('chevron')}</button>
+          <ul class="dropdown" id="dd-kuvars">
+            ${quartz.map((b) => `<li><a href="/kuvars/${b.slug}/"${cur(`kuvars-${b.slug}`)}>${b.name}</a></li>`).join('')}
+            <li class="dropdown__all"><a href="/kuvars/">Tüm kuvars markaları</a></li>
           </ul>
         </li>
         <li class="nav__drop">
@@ -137,6 +155,7 @@ function header(active) {
         <li><a href="/">Anasayfa</a></li>
         <li><a href="/kurumsal/">Kurumsal</a></li>
         <li><a href="/koleksiyon/">Koleksiyon</a></li>
+        <li><a href="/kuvars/">Kuvars markaları</a></li>
         <li><a href="/projeler/">Projeler</a></li>
         <li><a href="/iletisim/">İletişim</a></li>
       </ul>
@@ -162,6 +181,8 @@ function footer() {
     <div>
       <h2 class="ftr__title">Doğal Taş Koleksiyonu</h2>
       <ul class="ftr__links">${collection.map((m) => `<li><a href="/koleksiyon/${m.slug}/">${m.name}</a></li>`).join('')}</ul>
+      <h2 class="ftr__title ftr__title--sub">Kuvars Markaları</h2>
+      <ul class="ftr__links">${quartz.map((b) => `<li><a href="/kuvars/${b.slug}/">${b.name}</a></li>`).join('')}</ul>
     </div>
     <div>
       <h2 class="ftr__title">Hizmetler</h2>
@@ -250,6 +271,21 @@ const collectionGrid = (list = collection) => `<ul class="coll">
     <a href="/koleksiyon/${m.slug}/">
       <span class="coll__img">${m.card === 'slab' ? slabImg(m, { sizes: '(max-width: 700px) 92vw, (max-width: 1100px) 46vw, 400px' }) : appImg(m, { sizes: '(max-width: 700px) 92vw, (max-width: 1100px) 46vw, 400px' })}</span>
       <span class="coll__cap"><b>${m.name}</b><small>İncele ${icon('arrow')}</small></span>
+    </a>
+  </li>`).join('')}
+</ul>`;
+
+// Kuvars marka kartları: uygulama görseli + marka + renk çeşitliliğini gösteren beş çip (content: chips)
+const quartzCards = (list = quartz) => `<ul class="qbrands qbrands--n${list.length}">
+  ${list.map((b, i) => `<li class="qbrand reveal" style="--d:${i % 4}">
+    <a href="/kuvars/${b.slug}/">
+      <span class="qbrand__img">${qApp(b.slug, qBg(b), { sizes: '(max-width: 700px) 92vw, (max-width: 1100px) 46vw, 320px' })}</span>
+      <span class="qbrand__body">
+        <small>${b.line}</small>
+        <b>${b.name}</b>
+        <span class="qbrand__chips" aria-hidden="true">${b.chips.map((f) => b.colors.find((c) => c.file === f)).map((c) => `<img src="${Q(b.slug, c.file)}-levha-120.webp" width="120" height="120" alt="" ${LAZY}>`).join('')}</span>
+        <em>${b.colors.length} renk ${icon('arrow')}</em>
+      </span>
     </a>
   </li>`).join('')}
 </ul>`;
@@ -344,7 +380,7 @@ const ctaBand = (h = 'Projenizi konuşalım', p = "Fiyat bilgisi ve keşif için
 
 // İç sayfa başlığı: koyu fotoğraf bant + yol
 const pageBand = ({ trail, h1, lead = '', bg = null }) => `<section class="pband">
-  ${bg ? `<div class="pband__bg" data-parallax="0.25">${bg.px ? pxImg(bg.px, { sizes: '100vw', eager: true, hero: bg.px.startsWith('hero-') }) : img(bg.photo, { sizes: '100vw', eager: true })}</div>` : ''}
+  ${bg ? `<div class="pband__bg" data-parallax="0.25">${bg.html ? bg.html : bg.px ? pxImg(bg.px, { sizes: '100vw', eager: true, hero: bg.px.startsWith('hero-') }) : img(bg.photo, { sizes: '100vw', eager: true })}</div>` : ''}
   <div class="wrap pband__in">
     ${crumbs(trail)}
     <h1>${h1}</h1>
@@ -394,6 +430,11 @@ function homePage() {
   <div class="wrap">
     ${title({ k: 'Doğal taş', h: 'Koleksiyonumuz', p: 'En çok çalıştığımız taşlar ve kullanıldıkları yerler. Her taşın sayfasında yüzey, kullanım ve bakım bilgisi var.', center: true })}
     ${collectionGrid()}
+    <div class="qhome">
+      ${title({ k: 'Kuvars tezgâh', h: 'Kuvars markaları', p: 'Coante, Calisco, Çimstone ve Maestro kataloglarından renk seçin; ölçü, kesim ve montajı biz yapalım.', center: true })}
+      ${quartzCards()}
+      <p class="center-actions reveal">${btn('btn--line', '/kuvars/', 'Tüm kuvars markaları', { ic: 'arrow' })}</p>
+    </div>
   </div>
 </section>
 
@@ -496,6 +537,101 @@ ${ctaBand(`${m.name} için fiyat alın`, undefined, waText)}`;
     schema: [graph(
       { '@type': 'WebPage', name: m.name, url: abs(path), isPartOf: { '@id': abs('/#site') }, about: { '@id': BIZ_ID } },
       crumbsLd([['Anasayfa', '/'], ['Koleksiyon', '/koleksiyon/'], [m.name, path]]),
+    )],
+    body,
+  });
+}
+
+// ---------- Kuvars markaları ----------
+function quartzHubPage() {
+  const path = '/kuvars/';
+  const trail = [['Anasayfa', '/'], ['Kuvars Markaları', path]];
+  const tik = quartz.find((b) => b.slug === 'cimstone');
+  const body = `
+${pageBand({ trail, h1: 'Kuvars Tezgâh Markaları', lead: 'Numune kataloğu bizde bulunan kuvars markaları. Rengi birlikte seçiyor; ölçü, kesim ve montajı kendi ekibimizle yapıyoruz.', bg: { html: qWide(tik.slug, 'calacatta-tikal') } })}
+<section class="sec sec--white">
+  <div class="wrap">
+    ${title({ k: 'Kuvars tezgâh', h: 'Markalar', p: 'Her markanın sayfasında renklerin yüzey görselini ve bitmiş mutfak ya da banyo tezgâhındaki görünümünü bulabilirsiniz.', center: true })}
+    ${quartzCards()}
+  </div>
+</section>
+<section class="sec sec--cream">
+  <div class="wrap qabout">
+    <div class="qabout__text reveal">
+      ${kicker('Kuvars mı, mermer mi?')}
+      <h2>Kuvars yüzey nedir?</h2>
+      <p>Kuvars yüzey, doğal kuvars kırığının az miktarda reçine ve renk pigmentiyle preslenmesiyle üretilen levhadır. Mermer görünümünü verir ama gözeneksizdir; bu yüzden leke tutmaz ve mutfak tezgâhında bakım istemez.</p>
+      <p>Doğal mermerde ise her plakanın damarı ve tonu farklıdır. Hangisinin size uygun olduğunu kullanım yerine ve bütçeye göre birlikte seçelim.</p>
+      ${btn('btn--line', '/koleksiyon/', 'Doğal taş koleksiyonu', { ic: 'arrow' })}
+    </div>
+    <ul class="qfacts reveal">
+      <li><b>Gözeneksiz</b><span>Sıvı çekmez; kahve, yağ ve limon lekesi tutmaz.</span></li>
+      <li><b>Bakım istemez</b><span>Cila ya da koruyucu gerekmez; sabunlu suyla temizlenir.</span></li>
+      <li><b>Sıcağa dikkat</b><span>Ocaktan yeni inmiş tencere için nihale kullanın.</span></li>
+    </ul>
+  </div>
+</section>
+${ctaBand('Kuvars tezgâh için fiyat alın', undefined, 'Merhaba, kuvars mutfak tezgâhı için bilgi almak istiyorum.')}`;
+  return layout({
+    key: 'kuvars',
+    path,
+    title: 'Kırıkkale Kuvars Tezgâh Markaları | Hasbey Karo Mermer',
+    description: "Kırıkkale'de kuvars mutfak tezgâhı: Coante, Calisco, Çimstone ve Maestro renkleri. Renk seçimi, ölçü, kesim ve montaj Hasbey Karo Mermer'den.",
+    schema: [graph(
+      { '@type': 'CollectionPage', name: 'Kuvars Tezgâh Markaları', url: abs(path), isPartOf: { '@id': abs('/#site') }, about: { '@id': BIZ_ID } },
+      crumbsLd(trail),
+    )],
+    body,
+  });
+}
+
+function quartzPage(b) {
+  const path = `/kuvars/${b.slug}/`;
+  const trail = [['Anasayfa', '/'], ['Kuvars Markaları', '/kuvars/'], [b.name, path]];
+  const waText = `Merhaba, ${b.name} kuvars tezgâh renkleri hakkında bilgi almak istiyorum.`;
+  const body = `
+${pageBand({ trail, h1: b.name, lead: `${b.full} · ${b.line}`, bg: { html: qWide(b.slug, b.bg) } })}
+<section class="sec sec--white">
+  <div class="wrap">
+    ${title({ k: `${b.name} · ${b.line}`, h: 'Renkler', p: `${b.lead} Görsele dokunarak yüzeyi büyütebilirsiniz.`, center: true })}
+    <ul class="qgrid">
+      ${b.colors.map((c, i) => `<li class="qcolor reveal" style="--d:${i % 3}">
+        <button type="button" class="gallery__btn qcolor__img" data-full="${Q(b.slug, c.file)}-levha.webp" data-cap="${esc(`${b.name} ${c.name} ${c.code}`)}" aria-label="${esc(`${c.name} yüzeyini büyüt`)}">${qSlab(b.slug, c)}</button>
+        <div class="qcolor__body"><b>${c.name}</b><small>${c.code}${c.series ? ` · ${c.series}` : ''}</small><span>${c.tone}</span></div>
+      </li>`).join('')}
+    </ul>
+  </div>
+</section>
+<section class="sec sec--cream">
+  <div class="wrap">
+    ${title({ k: 'Bitmiş görünüm', h: 'Uygulama örnekleri', p: 'Aynı renklerin mutfak ve banyo tezgâhında görünümü. Görseller markanın kendi uygulama görselleridir.', center: true })}
+    <div class="works">
+      ${b.colors.map((c, i) => `<figure class="work reveal" style="--d:${i % 3}">
+        <button type="button" class="gallery__btn" data-full="${Q(b.slug, c.file)}-uygulama.webp" data-cap="${esc(`${b.name} ${c.name} ${c.code} · örnek uygulama`)}" aria-label="${esc(`${c.name} uygulama görselini büyüt`)}">
+          ${qApp(b.slug, c)}
+          <span class="work__cap"><b>${c.name}</b><small>${b.name} · ${c.code}</small></span>
+        </button>
+      </figure>`).join('')}
+    </div>
+    <p class="qnote reveal">Renk adları, kodlar ve görseller markanın resmi sitesinden alınmıştır (<a href="${b.site}" target="_blank" rel="noopener">${b.siteLabel}</a>); görsellerin hakları ${b.full} markasına aittir. Güncel renk listesi, stok ve fiyat için bize danışın.</p>
+  </div>
+</section>
+<section class="sec sec--white">
+  <div class="wrap">
+    ${title({ k: 'Kuvars tezgâh', h: 'Diğer markalar', center: true })}
+    ${quartzCards(quartz.filter((o) => o.slug !== b.slug))}
+  </div>
+</section>
+${ctaBand(`${b.name} kuvars tezgâh için fiyat alın`, undefined, waText)}`;
+  return layout({
+    key: `kuvars-${b.slug}`,
+    path,
+    title: `${b.name} Kuvars Tezgâh Renkleri – Kırıkkale | Hasbey Karo Mermer`,
+    description: clip(`${b.lead} Kırıkkale'de renk seçimi, ölçü, kesim ve montaj Hasbey Karo Mermer'den.`, 158),
+    schema: [graph(
+      { '@type': 'WebPage', name: `${b.name} kuvars tezgâh renkleri`, url: abs(path), isPartOf: { '@id': abs('/#site') }, about: { '@id': BIZ_ID },
+        mainEntity: { '@type': 'ItemList', name: `${b.full} renkleri`, itemListElement: b.colors.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: `${b.name} ${c.name} ${c.code}` })) } },
+      crumbsLd(trail),
     )],
     body,
   });
@@ -698,7 +834,7 @@ ${pageBand({ trail: [['Anasayfa', '/'], ['Sayfa bulunamadı', '/404.html']], h1:
 
 // ---------- Yardımcı dosyalar ----------
 const sitemap = () => {
-  const urls = [['/', '1.0'], ...services.map((s) => [`/${s.slug}/`, '0.9']), ['/koleksiyon/', '0.8'], ...collection.map((m) => [`/koleksiyon/${m.slug}/`, '0.7']), ['/kurumsal/', '0.6'], ['/projeler/', '0.7'], ['/iletisim/', '0.7']];
+  const urls = [['/', '1.0'], ...services.map((s) => [`/${s.slug}/`, '0.9']), ['/koleksiyon/', '0.8'], ...collection.map((m) => [`/koleksiyon/${m.slug}/`, '0.7']), ['/kuvars/', '0.8'], ...quartz.map((b) => [`/kuvars/${b.slug}/`, '0.7']), ['/kurumsal/', '0.6'], ['/projeler/', '0.7'], ['/iletisim/', '0.7']];
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(([p, pr]) => `  <url><loc>${abs(p)}</loc><lastmod>${site.lastmod}</lastmod><priority>${pr}</priority></url>`).join('\n')}
@@ -807,6 +943,9 @@ await rm(OUT + 'koleksiyon', { recursive: true, force: true });
 await put('index.html', homePage());
 await put('koleksiyon/index.html', collectionPage());
 for (const m of collection) await put(`koleksiyon/${m.slug}/index.html`, materialPage(m));
+await rm(OUT + 'kuvars', { recursive: true, force: true });
+await put('kuvars/index.html', quartzHubPage());
+for (const b of quartz) await put(`kuvars/${b.slug}/index.html`, quartzPage(b));
 await put('kurumsal/index.html', corporatePage());
 for (const s of services) await put(`${s.slug}/index.html`, servicePage(s));
 await put('projeler/index.html', projectsPage());
@@ -824,4 +963,4 @@ if (!base) {
   await rm(OUT + '.htaccess', { force: true });
   await rm(OUT + '_headers', { force: true });
 }
-console.log(`Derlendi → ${OUT} (${services.length + collection.length + 6} sayfa)${base ? `, alt klasör: ${base}` : ''}`);
+console.log(`Derlendi → ${OUT} (${services.length + collection.length + quartz.length + 7} sayfa)${base ? `, alt klasör: ${base}` : ''}`);

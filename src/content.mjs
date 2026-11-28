@@ -355,3 +355,79 @@ export const slides = [
   { px: 'hero-banyo', kicker: 'Beyaz mermer · Traverten · Gri mermer', title: 'Doğal taşta usta işçilik', text: 'Plakaları birlikte seçiyor, ölçüyü yerinde alıyor, işi kendi ekibimizle teslim ediyoruz.', link: '/koleksiyon/', linkText: 'Taş koleksiyonu' },
   { px: 'hero-merdiven', kicker: 'Basamak · Merdiven · Denizlik', title: 'Kalıcı, sağlam, zarif', text: 'Konut, site ve iş yeri inşaatlarında basamak, merdiven, denizlik ve zemin mermer işleri.', link: '/kirikkale-basamak-merdiven-mermer/', linkText: 'Basamak ve merdiven' },
 ];
+
+// ---------- Kuvars tezgâh markaları (2026-11-28) ----------
+// Hasbey'de numune kataloğu bulunan markalar (kullanıcının gönderdiği katalog fotoğrafları: Coante Essence,
+// Calisco, Çimstone, Maestro Quartz Design). Renk adı, kod ve görseller markaların resmi sitelerinden alındı;
+// her marka sayfasında kaynak yazılı. Görseller: public/assets/img/kuvars/<marka>/<renk>-{levha,uygulama}.
+// c: [dosya adı, resmi ad, kod, seri/not, görünüm]
+export const quartz = [
+  {
+    slug: 'coante', name: 'Coante', full: 'Coante Quartz Surfaces', line: 'Essence koleksiyonu',
+    site: 'https://www.coante.com/tr/essence', siteLabel: 'coante.com',
+    lead: "Coante'nin Essence koleksiyonundan seçtiğimiz kuvars renkleri: Calacatta görünümlü beyaz damarlılardan grafit ve siyaha.",
+    bg: 'storia', chips: ['storia', 'alba-via', 'magnificent', 'arte-black', 'majestic-brown'],
+    colors: [
+      ['storia', 'Storia', '9904', 'Mega serisi', 'Beyaz zemin, dallanan gri damar'],
+      ['calacatta-riviera', 'Calacatta Riviera Ultra', '9004', 'Ultra serisi', 'Beyaz zemin, kümelenen gri damar'],
+      ['thunder', 'Thunder', '9908', 'Mega serisi', 'Beyaz zemin, ince paralel damar'],
+      ['tenera', 'Tenera Ultra', '9007', 'Ultra serisi', 'Beyaz zemin, ince dağınık damar'],
+      ['majestic-brown', 'Majestic Brown', '9905', 'Mega serisi', 'Beyaz zemin, gri-kahve damar'],
+      ['alba-via', 'Alba Via', '5507', 'Emotional serisi', 'Açık bej zemin, ince damar'],
+      ['keramos', 'Keramos', '3301', 'Antique serisi', 'Beyaz zemin, ince gri desen'],
+      ['magnificent', 'Magnificent', '5503', 'Emotional serisi', 'Gri zemin, dalgalı açık damar'],
+      ['arte-black', 'Arte Black', '7716', 'Allure serisi', 'Siyah zemin, ince beyaz damar'],
+    ],
+  },
+  {
+    slug: 'calisco', name: 'Calisco', full: 'Calisco Quartz Surfaces', line: 'Kuvars yüzeyler',
+    site: 'https://www.calisco.com.tr/urunler', siteLabel: 'calisco.com.tr',
+    lead: "Calisco'nun mermer görünümlü kuvars renkleri: geniş damarlı Calacatta beyazlarından bej, kahve ve siyaha.",
+    bg: 'calacatta-clara', chips: ['calacatta-clara', 'piana', 'olivia', 'felisia', 'santa'],
+    colors: [
+      ['calacatta-clara', 'Calacatta Clara', '7352', '', 'Beyaz zemin, geniş krem damar'],
+      ['calacatta-aldeon', 'Calacatta Aldeon', '7134', '', 'Beyaz zemin, geniş gri damar'],
+      ['bolera', 'Bolera', '7268', '', 'Beyaz zemin, seyrek ince damar'],
+      ['milena', 'Milena', '3301', '', 'Beyaz zemin, ince gri damar'],
+      ['piana', 'Piana', '7835', '', 'Krem zemin, ince altın tonlu damar'],
+      ['olivia', 'Olivia', '4405', '', 'Bej zemin, koyu kıvrımlı damar'],
+      ['felisia', 'Felisia', '3302', '', 'Koyu kahve-gri zemin, beyaz damar'],
+      ['santa', 'Santa', '3303', '', 'Siyah zemin, ince beyaz damar'],
+      ['sadira', 'Sadira', '2210', '', 'Siyah zemin, ince benek ve damar'],
+    ],
+  },
+  {
+    slug: 'cimstone', name: 'Çimstone', full: 'Çimstone Kuvars Yüzeyler', line: 'EPIQ koleksiyonu',
+    site: 'https://cimstone.com.tr/koleksiyonlar/', siteLabel: 'cimstone.com.tr',
+    lead: "Çimstone'un EPIQ koleksiyonundan büyük damarlı, mermer görünümlü kuvars yüzeyler: Calacatta beyazlarından traverten ve koyu griye.",
+    bg: 'calacatta-anka', chips: ['calacatta-anka', 'hatra', 'leptis-magna', 'pompei', 'atlantis'],
+    colors: [
+      ['calacatta-anka', 'Calacatta Anka', '2081', 'EPIQ', 'Beyaz zemin, altın ve gri damar'],
+      ['calacatta-lal', 'Calacatta Lâl', '2094', 'EPIQ', 'Beyaz zemin, belirgin gri damar'],
+      ['calacatta-tikal', 'Calacatta Tikal', '2087', 'EPIQ', 'Beyaz zemin, çapraz gri damar'],
+      ['arpels', 'Arpels', '2038', 'EPIQ', 'Beyaz zemin, yoğun gri damar ağı'],
+      ['hatra', 'Hatra', '2057', 'EPIQ', 'Beyaz zemin, kahve-bej damar'],
+      ['amber', 'Amber', '2045', 'EPIQ', 'Açık gri zemin, bakır tonlu damar'],
+      ['leptis-magna', 'Leptis Magna', '2014', 'EPIQ', 'Traverten görünümlü bej'],
+      ['pompei', 'Pompei', '2055', 'EPIQ', 'Koyu gri zemin, beyaz damar'],
+      ['atlantis', 'Atlantis', '2017', 'EPIQ', 'Mavi-yeşil zemin, altın tonlu damar'],
+    ],
+  },
+  {
+    slug: 'maestro', name: 'Maestro', full: 'Maestro Quartz Design', line: 'Granitaş kuvars markası',
+    site: 'https://maestroquartzdesign.com/urunler/maestro-quartz', siteLabel: 'maestroquartzdesign.com',
+    lead: "Granitaş'ın kuvars markası Maestro Quartz Design'dan renkler: damarlı beyaz ve kremlerden düz griye ve siyaha.",
+    bg: 'norma', chips: ['gilda', 'isolde', 'figaro', 'bolero', 'norma'],
+    colors: [
+      ['gilda', 'Gilda', '207', '', 'Beyaz zemin, kısa gri damar'],
+      ['spring', 'Spring', '501', '', 'Krem zemin, seyrek gri damar'],
+      ['amore', 'Amore', '604', '', 'Krem-beyaz zemin, ince damar'],
+      ['figaro', 'Figaro', '502', '', 'Gri zemin, ince açık damar'],
+      ['fortuna', 'Fortuna', '504', '', 'Siyah zemin, beyaz damar'],
+      ['norma', 'Norma', '605', '', 'Siyah zemin, ince beyaz damar'],
+      ['isolde', 'Isolde', '208', '', 'Düz krem'],
+      ['moonlight', 'Moonlight', '304', '', 'Siyah zemin, parlak benek'],
+      ['bolero', 'Bolero', '102', '', 'Düz koyu gri'],
+    ],
+  },
+].map((b) => ({ ...b, colors: b.colors.map(([file, name, code, series, tone]) => ({ file, name, code, series, tone })) }));

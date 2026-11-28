@@ -54,6 +54,19 @@ Site, yapay zekâ desteğiyle (Claude) hazırlanmıştır.
 | peyzaj-yol | [39457331](https://www.pexels.com/photo/39457331/) |
 | siyah-mermer | [6788338](https://www.pexels.com/photo/6788338/) |
 
+### Kuvars markaları (`/kuvars/`)
+
+Hasbey'de numune kataloğu bulunan dört kuvars markasının renkleri. Renk adları, kodlar, levha ve uygulama
+görselleri markaların resmi sitelerinden alınmıştır; görsellerin hakları markalara aittir ve her marka
+sayfasında kaynak belirtilir. Veriler `src/content.mjs` → `quartz`, görseller `public/assets/img/kuvars/<marka>/`.
+
+| Marka | Koleksiyon | Kaynak |
+|---|---|---|
+| Coante | Essence | [coante.com](https://www.coante.com/tr/essence) |
+| Calisco | Kuvars yüzeyler | [calisco.com.tr](https://www.calisco.com.tr/urunler) |
+| Çimstone | EPIQ | [cimstone.com.tr](https://cimstone.com.tr/koleksiyonlar/) |
+| Maestro (Granitaş) | Maestro Quartz Design | [maestroquartzdesign.com](https://maestroquartzdesign.com/urunler/maestro-quartz) |
+
 ### Giriş videosu
 
 `public/assets/video/hasbey-giris-1080.mp4` (masaüstü, 1920×1080) ve `hasbey-giris-dikey.mp4` (telefon, 540×960)
